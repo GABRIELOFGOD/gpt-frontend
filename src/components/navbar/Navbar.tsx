@@ -1,13 +1,31 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { IoMenu } from "react-icons/io5";
-import { NavLiistType, navList } from "../../utils/contants";
-import { Link } from "react-router-dom";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useState } from "react";
+import { IoMenu } from "react-icons/io5";
+import { Link, useNavigate } from "react-router-dom";
+import { useAccount, useSignMessage } from 'wagmi';
+import { NavLiistType, navList } from "../../utils/contants";
 
 const Navbar = () => {
   const [navOpen, setNavOpen] = useState(false);
-  
-  return(
+  const { isConnected } = useAccount();
+  const { signMessage } = useSignMessage();
+  const navigate = useNavigate();
+
+  const handleSignMessage = async () => {
+    if (isConnected) {
+      const message = "Please sign this message to verify your wallet ownership.";
+      try {
+        const signature = signMessage({ message });
+        console.log("Signature:", signature);
+        navigate('/investments')
+        // You can now use the signature for verification
+      } catch (error) {
+        console.error("Error signing message:", error);
+      }
+    }
+  };
+
+  return (
     <div className="flex bg-secondary top-0 sticky z-50 justify-between py-2 px-6 shadow-sm">
       <div className="flex items-center space-x-4">
         <div className=" text-white font-bold text-2xl">GPT Bot</div>
@@ -25,7 +43,13 @@ const Navbar = () => {
         ))}
       </div>
       <div className="flex items-center space-x-4">
-        <div className="text-sm font-semibold text-gray-500"><ConnectButton showBalance={true} /></div>
+        {isConnected ? (
+          <button onClick={handleSignMessage} className="text-sm font-semibold text-gray-500">
+            Sign Message
+          </button>
+        ) : (
+          <ConnectButton showBalance={true} />
+        )}
         <div onClick={() => setNavOpen(!navOpen)} className="flex text-white md:hidden">
           <IoMenu color="#ffff" size={25} />
         </div>
