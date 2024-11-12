@@ -1,5 +1,16 @@
+import { useNavigate } from "react-router-dom";
+import { useGlobalContext } from "../components/context/GlobalContext";
+import { useEffect } from "react";
 
 const Withrawals = () => {
+  const { userWallet } = useGlobalContext();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if(!userWallet){
+      navigate("/");
+    }
+  }, [navigate, userWallet]);
   return (
     <div className="px-3 md:px-52 flex flex-col gap-10 py-10 md:py-20">
       <div className="border-secondary rounded-md border">

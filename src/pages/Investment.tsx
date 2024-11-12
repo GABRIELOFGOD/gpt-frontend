@@ -1,9 +1,21 @@
+import { useEffect } from "react"
+import { useGlobalContext } from "../components/context/GlobalContext";
+import { useNavigate } from "react-router-dom";
 
 const availableSub: number[] = [
   100, 300, 500, 1000, 3000, 5000, 10000, 25000, 50000, 100000
 ]
 
 const Investment = () => {
+  const { userWallet } = useGlobalContext();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if(!userWallet){
+      navigate("/");
+    }
+  }, [navigate, userWallet]);
+  
   return (
     <div className="px-3 md:px-52 flex flex-col gap-10 py-10 md:py-20">
       <div className="border-secondary rounded-md border">

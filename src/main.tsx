@@ -4,9 +4,12 @@ import "./index.css";
 import App from './App.tsx'
 
 import '@rainbow-me/rainbowkit/styles.css';
+import { CreateGlobalContext } from './components/context/GlobalContext.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <CreateGlobalContext>
+      <App />
+    </CreateGlobalContext>
   </StrictMode>,
 )
