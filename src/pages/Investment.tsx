@@ -23,13 +23,13 @@ const Investment = () => {
           <p className="text-2xl font-semibold">Subscriptions</p>
         </div>
         <div className="px-3">
-          <p className="text-secondary opacity-60 text-center py-3 text-xl font-semibold">Grab a New Plan or Upgrade before slots are full</p>
-          <div className="py-4 md:px-8 px-4 bg-light flex flex-wrap gap-5 rounded-md justify-evenly">
+          <p className="text-secondary opacity-60 text-center py-3 md:text-xl text-lg font-semibold">Grab a New Plan or Upgrade before slots are full</p>
+          <div className="py-4 md:px-8 px-4 bg-light flex flex-wrap gap-3 rounded-md justify-evenly">
             {availableSub.map((item, i) => (
               <button
                 key={i}
                 onClick={()=>{}}
-                className="bg-secondary bg-opacity-5 font-semibold text-lg w-[80px] rounded-sm py-2 text-white"
+                className="bg-secondary bg-opacity-5 font-semibold md:text-lg text-base w-[75px] rounded-sm py-2 text-white"
               >${item}</button>
             ))}
           </div>

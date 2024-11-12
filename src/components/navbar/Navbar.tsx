@@ -43,13 +43,13 @@ const Navbar = () => {
         ))}
       </div>
       <div className="flex items-center space-x-4">
-        {isConnected ? (
+        {isConnected  ? (
+          <ConnectButton showBalance={true} />
+        ) : (
           <button onClick={handleSignMessage} className="text-sm font-semibold text-gray-500">
             Sign Message
           </button>
-        ) : (
-          <ConnectButton showBalance={true} />
-        )}
+          )}
         <div onClick={() => setNavOpen(!navOpen)} className="flex text-white md:hidden">
           <IoMenu color="#ffff" size={25} />
         </div>
