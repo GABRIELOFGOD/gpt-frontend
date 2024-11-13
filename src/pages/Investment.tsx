@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useBalance, useReadContract, useWaitForTransactionReceipt, useWriteContract, type BaseError } from "wagmi";
-import { abi } from "../../abi";
+import { useBalance, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { contractAbi } from "../../abi";
 import { useGlobalContext } from "../components/context/GlobalContext";
+
+import { tokenAbi } from "../../testabi";
 
 const availableSub: number[] = [
   100, 300, 500, 1000, 3000, 5000, 10000, 25000, 50000, 100000
@@ -13,36 +15,43 @@ const Investment = () => {
   const navigate = useNavigate();
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
   const { data: hash, writeContract, isPending, error } = useWriteContract()
-
   const [usdtBalance, setUsdtBalance] = useState<string>("0");
   const [bnbBalance, setbnbBalance] = useState<string>("0");
 
   // Get USDT balance
   const { data: usdtData } = useReadContract({
-    address: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', // USDT contract address
+    ...tokenAbi,
+    address: '0x5A7a2426DD0597Ef689420a5EBA474b56157C2B1', // USDT contract address
     functionName: 'balanceOf',
-    args: [userWallet],
+    args: ["0x7b49660dc6F25326d2fA7C3CD67970dF73eB5Ec1"],
   });
 
   // Get BNB balance
   const { data: bnbData } = useBalance({
-    address: userWallet as `0x${string}`,
-  });
-
-  useEffect(() => {
-    if (usdtData) {
-      setUsdtBalance((Number(usdtData) / 1e18).toFixed(2));
-    }
-    if (bnbData) {
-      setbnbBalance(Number(bnbData.formatted).toFixed(2));
-    }
-  }, [usdtData, bnbData]);
+    address: "0x7b49660dc6F25326d2fA7C3CD67970dF73eB5Ec1" as `0x${string}`,
+    chainId: 97,
+  })
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
     })
+  useEffect(() => {
+    if (bnbData) {
+      setbnbBalance(Number(bnbData.formatted).toFixed(2));
+    }
 
+    if (usdtData) {
+      setUsdtBalance((Number(usdtData) / 1e18).toFixed(2));
+    }
+  }, [usdtData, bnbData]);
+
+
+  useEffect(() => {
+    if (error) {
+      console.log('Transaction error:', error);
+    }
+  }, [error]);
 
   useEffect(() => {
     if (!userWallet) {
@@ -50,41 +59,33 @@ const Investment = () => {
     }
   }, [navigate, userWallet]);
 
-  useEffect(() => {
-    if (isConfirmed && hash) {
-      console.log("Transaction confirmed with hash:", hash);
-    }
-  }, [isConfirmed, hash]);
-
-
   const handleInvest = async () => {
     if (!selectedAmount) return;
 
     try {
-      // const approvalHash = writeContract({
-      //   address: '0xc2132d05d31c914a87c6611c10748aeb04b58e8f', // USDT contract address
-      //   abi,
-      //   functionName: 'approve',
-      //   args: ['0x00000000000000000000000000967fC04f3579c2', BigInt(selectedAmount)], // Contract address and amount
-      // });
-
-      // Wait for approval transaction to be confirmed
-      // await new Promise((resolve, reject) => {
-      //   const approvalReceipt = useWaitForTransactionReceipt({ hash: approvalHash });
-      //   if (approvalReceipt.isSuccess) {
-      //     resolve(true);
-      //   } else {
-      //     reject(new Error("Approval failed"));
-      //   }
-      // });
-
-      // Step 2: Proceed with the investment
+      // Step 1: Approve USDT spending
       writeContract({
-        address: '0x00000000000000000000000000967fC04f3579c2',
-        abi,
-        functionName: 'deposit',
-        args: [BigInt(selectedAmount)],
-      })
+        ...tokenAbi,
+        address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517', // USDT contract address
+        functionName: 'approve',
+        args: ['0x7b49660dc6F25326d2fA7C3CD67970dF73eB5Ec1', BigInt(selectedAmount * 1e18)], // Convert to wei
+      });
+
+      // The deposit transaction will need to be triggered after approval confirmation
+      // You can add another useEffect to watch for approval confirmation:
+      useEffect(() => {
+        if (isConfirmed && hash) {
+          console.log("Transaction confirmed with hash:", hash);
+          // Step 2: Make the deposit
+          writeContract({
+            ...contractAbi,
+            address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23' as `0x${string}`,
+            functionName: 'deposit',
+            args: [BigInt(selectedAmount * 1e18)], // Convert to wei
+          });
+        }
+      }, [isConfirmed, hash]);
+
     } catch (error) {
       console.error("Investment failed:", error);
     }
@@ -178,13 +179,6 @@ const Investment = () => {
           <button className="flex justify-center w-full md:w-fit px-8 rounded-md py-2 bg-secondary text-white mb-5 text-lg font-semibold">Copy</button>
         </div>
       </div>
-      {/* {isPending ? 'Confirming...' : 'Mint'}
-      {hash && <div>Transaction Hash: {hash}</div>}
-      {isConfirming && <div>Waiting for confirmation...</div>}
-      {isConfirmed && <div>Transaction confirmed.</div>}
-      {error && (
-        <div>Error: {(error as BaseError).shortMessage || error.message}</div>
-      )} */}
     </div>
   )
 }

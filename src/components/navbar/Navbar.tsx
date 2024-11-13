@@ -7,7 +7,7 @@ import { NavLiistType, navList } from "../../utils/contants";
 
 const Navbar = () => {
   const [navOpen, setNavOpen] = useState(false);
-  const { isConnected, connector } = useAccount();
+  const { isConnected, connector, address } = useAccount();
   const { signMessage } = useSignMessage();
   const navigate = useNavigate();
 
@@ -32,7 +32,7 @@ const Navbar = () => {
       handleSignMessage();
     }
 
-  }, [isConnected]); // Run when isConnected changes
+  }, [address]); 
 
   return (
     <div className="flex bg-secondary top-0 sticky z-50 justify-between py-2 px-6 shadow-sm">
