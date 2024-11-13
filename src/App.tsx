@@ -11,7 +11,7 @@ import {
 import { RouterProvider } from 'react-router-dom';
 import { Config, WagmiProvider } from 'wagmi';
 import {
-  bsc
+  bscTestnet
 } from 'wagmi/chains';
 import route from './utils/route';
 
@@ -23,7 +23,7 @@ function App() {
   const config: Config = getDefaultConfig({
     appName: "Gpt bot",
     projectId: "gpt-bot",
-    chains: [bsc],
+    chains: [bscTestnet],
   });
 
   return (

@@ -11,8 +11,8 @@ interface Props {
 }
 
 export const CreateGlobalContext = ({ children }: Props) => {
-  const userWallet: string = "wallet1234567890";
-  
+  const userWallet: string = "0x7b49660dc6F25326d2fA7C3CD67970dF73eB5Ec1";
+
   return (
     <GlobalContext.Provider value={{ userWallet }}>
       {children}
