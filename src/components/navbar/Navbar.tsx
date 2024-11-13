@@ -1,5 +1,5 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoMenu } from "react-icons/io5";
 import { Link, useNavigate } from "react-router-dom";
 import { useAccount, useSignMessage } from 'wagmi';
@@ -7,23 +7,32 @@ import { NavLiistType, navList } from "../../utils/contants";
 
 const Navbar = () => {
   const [navOpen, setNavOpen] = useState(false);
-  const { isConnected } = useAccount();
+  const { isConnected, connector, address } = useAccount();
   const { signMessage } = useSignMessage();
   const navigate = useNavigate();
 
-  const handleSignMessage = async () => {
-    if (isConnected) {
-      const message = "Please sign this message to verify your wallet ownership.";
-      try {
-        const signature = signMessage({ message });
-        console.log("Signature:", signature);
-        navigate('/investments')
-        // You can now use the signature for verification
-      } catch (error) {
-        console.error("Error signing message:", error);
+  // Effect to handle message signing after wallet connection
+  useEffect(() => {
+    const handleSignMessage = async () => {
+      if (isConnected) {
+        const message = "Please sign this message to verify your wallet ownership.";
+
+        try {
+          signMessage({ message });
+          navigate('/investments');
+        } catch (error) {
+          navigate('/')
+          console.error("Error signing message:", error);
+        }
       }
+    };
+
+    // Only call handleSignMessage if the connector is available
+    if (connector) {
+      handleSignMessage();
     }
-  };
+
+  }, [address]); 
 
   return (
     <div className="flex bg-secondary top-0 sticky z-50 justify-between py-2 px-6 shadow-sm">
@@ -43,19 +52,13 @@ const Navbar = () => {
         ))}
       </div>
       <div className="flex items-center space-x-4">
-        {isConnected  ? (
-          <ConnectButton showBalance={true} />
-        ) : (
-          <button onClick={handleSignMessage} className="text-sm font-semibold text-gray-500">
-            Sign Message
-          </button>
-          )}
+
+        <ConnectButton showBalance={true} />
         <div onClick={() => setNavOpen(!navOpen)} className="flex text-white md:hidden">
           <IoMenu color="#ffff" size={25} />
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   )
 }
-
 export default Navbar
