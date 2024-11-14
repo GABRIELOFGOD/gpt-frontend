@@ -18,10 +18,12 @@ const Investment = () => {
   const [usdtBalance, setUsdtBalance] = useState<string>("0");
   const [bnbBalance, setbnbBalance] = useState<string>("0");
 
+  const [isApproved, setIsApproved] = useState(false);
+
   // Get USDT balance
   const { data: usdtData } = useReadContract({
     ...tokenAbi,
-    address: '0x5A7a2426DD0597Ef689420a5EBA474b56157C2B1', // USDT contract address
+    address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517', // USDT contract address
     functionName: 'balanceOf',
     args: [userWallet as `0x${string}`],
   });
@@ -59,40 +61,45 @@ const Investment = () => {
     }
   }, [navigate, userWallet]);
 
-  const handleInvest = async () => {
+  const handleApprove = async () => {
     if (!selectedAmount) return;
-  
+
     try {
-      // Step 1: Approve USDT spending
-      await writeContract({
+      writeContract({
         ...tokenAbi,
         address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517',
         functionName: 'approve',
-        args: [userWallet, BigInt(selectedAmount * 1e18)],
+        args: ['0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23', BigInt(selectedAmount * 1e18)],
       });
-  
-      // console.log("Approval transaction sent. Awaiting confirmation...");
-  
-      // Step 2: Make the deposit after approval
-      await writeContract({
+
+      setIsApproved(true);
+
+    } catch (error) {
+      console.error("Approval failed:", error);
+    }
+  };
+
+  const handleDeposit = async () => {
+    if (!selectedAmount || !isApproved) return;
+
+    try {
+      writeContract({
         ...contractAbi,
         address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23',
         functionName: 'deposit',
         args: [BigInt(selectedAmount * 1e18)],
       });
-  
-      // console.log("Deposit transaction completed.");
+
+      setSelectedAmount(0);
+      setIsApproved(false);
+
+      // todo add link backend here
+
     } catch (error) {
-      console.error("Investment failed:", error);
+      console.error("Deposit failed:", error);
     }
   };
-  
 
-  const getButtonText = () => {
-    if (isPending || isConfirming) return "Waiting for confirmation...";
-    if (isConfirmed) return "Transaction confirmed!";
-    return "Invest";
-  }
 
   return (
     <div className="px-3 md:px-52 flex flex-col gap-10 py-10 md:py-20">
@@ -130,14 +137,23 @@ const Investment = () => {
               <p>0</p>
             </div>
           </div>
-          <button
-            onClick={handleInvest}
-            disabled={!selectedAmount || isPending || isConfirming}
-            className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white mb-5 text-lg font-semibold ${(!selectedAmount || isPending || isConfirming) ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-          >
-            {getButtonText()}
-          </button>
+          {!isApproved ? (
+            <button
+              onClick={handleApprove}
+              disabled={!selectedAmount || isPending || isConfirming}
+              className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white mb-5 text-lg font-semibold ${(!selectedAmount || isPending || isConfirming) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isPending || isConfirming ? "Approving..." : "Approve USDT"}
+            </button>
+          ) : (
+            <button
+              onClick={handleDeposit}
+              disabled={isPending || isConfirming}
+              className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white mb-5 text-lg font-semibold ${(isPending || isConfirming) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isPending || isConfirming ? "Depositing..." : "Deposit"}
+            </button>
+          )}
         </div>
       </div>
 

@@ -22,6 +22,8 @@ const Navbar = () => {
         try {
           signMessage({ message });
           navigate('/investments');
+
+          // todo add link backend here
         } catch (error) {
           navigate('/')
           console.error("Error signing message:", error);
