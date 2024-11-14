@@ -4,12 +4,14 @@ import { IoMenu } from "react-icons/io5";
 import { Link, useNavigate } from "react-router-dom";
 import { useAccount, useSignMessage } from 'wagmi';
 import { NavLiistType, navList } from "../../utils/contants";
+import { useGlobalContext } from "../context/GlobalContext";
 
 const Navbar = () => {
   const [navOpen, setNavOpen] = useState(false);
   const { isConnected, connector, address } = useAccount();
   const { signMessage } = useSignMessage();
   const navigate = useNavigate();
+  const { setUserWallet } = useGlobalContext(); // Get the function to update the user wallet from the context
 
   // Effect to handle message signing after wallet connection
   useEffect(() => {
@@ -32,7 +34,14 @@ const Navbar = () => {
       handleSignMessage();
     }
 
-  }, [address]); 
+  }, [address, isConnected, connector, signMessage, navigate]);
+
+  // Effect to update the global context when the wallet is connected
+  useEffect(() => {
+    if (isConnected && address) {
+      setUserWallet(address); // Update the global context with the user's wallet address
+    }
+  }, [isConnected, address, setUserWallet]);
 
   return (
     <div className="flex bg-secondary top-0 sticky z-50 justify-between py-2 px-6 shadow-sm">
@@ -52,7 +61,6 @@ const Navbar = () => {
         ))}
       </div>
       <div className="flex items-center space-x-4">
-
         <ConnectButton showBalance={true} />
         <div onClick={() => setNavOpen(!navOpen)} className="flex text-white md:hidden">
           <IoMenu color="#ffff" size={25} />
@@ -61,4 +69,4 @@ const Navbar = () => {
     </div >
   )
 }
-export default Navbar
+export default Navbar;

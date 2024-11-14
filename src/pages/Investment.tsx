@@ -23,12 +23,12 @@ const Investment = () => {
     ...tokenAbi,
     address: '0x5A7a2426DD0597Ef689420a5EBA474b56157C2B1', // USDT contract address
     functionName: 'balanceOf',
-    args: ["0x7b49660dc6F25326d2fA7C3CD67970dF73eB5Ec1"],
+    args: [userWallet as `0x${string}`],
   });
 
   // Get BNB balance
   const { data: bnbData } = useBalance({
-    address: "0x7b49660dc6F25326d2fA7C3CD67970dF73eB5Ec1" as `0x${string}`,
+    address: userWallet as `0x${string}`,
     chainId: 97,
   })
 
@@ -61,35 +61,32 @@ const Investment = () => {
 
   const handleInvest = async () => {
     if (!selectedAmount) return;
-
+  
     try {
       // Step 1: Approve USDT spending
-      writeContract({
+      await writeContract({
         ...tokenAbi,
-        address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517', // USDT contract address
+        address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517',
         functionName: 'approve',
-        args: ['0x7b49660dc6F25326d2fA7C3CD67970dF73eB5Ec1', BigInt(selectedAmount * 1e18)], // Convert to wei
+        args: [userWallet, BigInt(selectedAmount * 1e18)],
       });
-
-      // The deposit transaction will need to be triggered after approval confirmation
-      // You can add another useEffect to watch for approval confirmation:
-      useEffect(() => {
-        if (isConfirmed && hash) {
-          console.log("Transaction confirmed with hash:", hash);
-          // Step 2: Make the deposit
-          writeContract({
-            ...contractAbi,
-            address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23' as `0x${string}`,
-            functionName: 'deposit',
-            args: [BigInt(selectedAmount * 1e18)], // Convert to wei
-          });
-        }
-      }, [isConfirmed, hash]);
-
+  
+      // console.log("Approval transaction sent. Awaiting confirmation...");
+  
+      // Step 2: Make the deposit after approval
+      await writeContract({
+        ...contractAbi,
+        address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23',
+        functionName: 'deposit',
+        args: [BigInt(selectedAmount * 1e18)],
+      });
+  
+      // console.log("Deposit transaction completed.");
     } catch (error) {
       console.error("Investment failed:", error);
     }
-  }
+  };
+  
 
   const getButtonText = () => {
     if (isPending || isConfirming) return "Waiting for confirmation...";
