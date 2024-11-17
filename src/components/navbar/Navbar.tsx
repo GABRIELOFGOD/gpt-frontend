@@ -2,47 +2,62 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useEffect, useState } from "react";
 import { IoMenu } from "react-icons/io5";
 import { Link, useNavigate } from "react-router-dom";
-import { useAccount, useSignMessage } from 'wagmi';
+import { useAccount, useDisconnect } from 'wagmi';
 import { NavLiistType, navList } from "../../utils/contants";
 import { useGlobalContext } from "../context/GlobalContext";
+import toast from "react-hot-toast";
+import { useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [navOpen, setNavOpen] = useState(false);
   const { isConnected, connector, address } = useAccount();
-  const { signMessage } = useSignMessage();
+  // const { signMessage } = useSignMessage();
   const navigate = useNavigate();
-  const { setUserWallet } = useGlobalContext(); // Get the function to update the user wallet from the context
+  const { setUserWallet, userLogin, userProfile } = useGlobalContext();
 
-  // Effect to handle message signing after wallet connection
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const ref = queryParams.get('ref');
+
   useEffect(() => {
     const handleSignMessage = async () => {
       if (isConnected) {
         const message = "Please sign this message to verify your wallet ownership.";
-
+        console.log("Query params", ref);
         try {
-          signMessage({ message });
-          navigate('/investments');
-
-          // todo add link backend here
+          toast.loading(message);
+  
+          // Attempt to sign in with the user's wallet
+          await userLogin(address as string, ref ? ref : undefined);
+          
+          toast.dismiss();
+          toast.success("Wallet connected successfully");
+          // navigate('/investments');
         } catch (error) {
-          navigate('/')
+          // Handle the error (e.g., failed login)
           console.error("Error signing message:", error);
+          
+          // Disconnect the wallet if login fails
+          await useDisconnect(); // Disconnect the wallet
+          toast.dismiss();
+          toast.error("Failed to connect wallet. Please try again.");
+          navigate('/'); // Redirect user to home or login page
         }
       }
     };
-
+  
     // Only call handleSignMessage if the connector is available
     if (connector) {
       handleSignMessage();
     }
-
-  }, [address, isConnected, connector, signMessage, navigate]);
+  }, [address, isConnected, connector, userLogin, navigate]);
 
   // Effect to update the global context when the wallet is connected
   useEffect(() => {
     if (isConnected && address) {
-      setUserWallet(address); // Update the global context with the user's wallet address
+      setUserWallet(address);
     }
+    userProfile();
   }, [isConnected, address, setUserWallet]);
 
   return (
@@ -50,7 +65,7 @@ const Navbar = () => {
       <div className="flex items-center space-x-4">
         <div className=" text-white font-bold text-2xl">GPT Bot</div>
       </div>
-      <div className={`my-auto flex md:flex-row flex-col gap-5 text-white font-semibold text-lg bg-primary md:bg-transparent duration-200 absolute md:relative w-full md:w-fit left-0 md:left-auto ${navOpen ? "top-14" : "top-[-1000px]"} px-6 md:px-0 py-10 md:py-0 md:top-auto`}>
+      <div className={`my-auto flex cursor-pointer md:flex-row flex-col gap-5 text-white font-semibold text-lg bg-primary md:bg-transparent duration-200 absolute md:relative w-full md:w-fit left-0 md:left-auto ${navOpen ? "top-14" : "top-[-1000px]"} px-6 md:px-0 py-10 md:py-0 md:top-auto`}>
         {navList.map((item: NavLiistType, i: number) => (
           <Link
             to={item.path}

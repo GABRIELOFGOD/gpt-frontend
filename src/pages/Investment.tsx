@@ -5,13 +5,14 @@ import { contractAbi } from "../../abi";
 import { useGlobalContext } from "../components/context/GlobalContext";
 
 import { tokenAbi } from "../../testabi";
+import toast from "react-hot-toast";
 
 const availableSub: number[] = [
   100, 300, 500, 1000, 3000, 5000, 10000, 25000, 50000, 100000
 ]
 
 const Investment = () => {
-  const { userWallet } = useGlobalContext();
+  const { userWallet, userInvestment, userProfileState, claimEarnings } = useGlobalContext();
   const navigate = useNavigate();
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
   const { data: hash, writeContract, isPending, error } = useWriteContract()
@@ -39,6 +40,7 @@ const Investment = () => {
       hash,
     })
   useEffect(() => {
+    // {userProfileState && console.log(userProfileState)}
     if (bnbData) {
       setbnbBalance(Number(bnbData.formatted).toFixed(2));
     }
@@ -57,7 +59,7 @@ const Investment = () => {
 
   useEffect(() => {
     if (!userWallet) {
-      navigate("/");
+      // navigate("/");
     }
   }, [navigate, userWallet]);
 
@@ -94,12 +96,17 @@ const Investment = () => {
       setIsApproved(false);
 
       // todo add link backend here
+      await userInvestment(selectedAmount);
 
     } catch (error) {
       console.error("Deposit failed:", error);
     }
   };
 
+  const copyToClipBoard = () => {
+    navigator.clipboard.writeText(`https://gptbots.pro?ref=${userProfileState?.referralCode}`);
+    toast.success("Referral link copied to clipboard");
+  }
 
   return (
     <div className="px-3 md:px-52 flex flex-col gap-10 py-10 md:py-20">
@@ -134,7 +141,7 @@ const Investment = () => {
             </div>
             <div className="flex justify-between font-semibold text-lg">
               <p>Total USDT Invested:</p>
-              <p>0</p>
+              <p>{userProfileState?.investments.reduce((total, investment) => total + investment.amount, 0)}</p>
             </div>
           </div>
           {!isApproved ? (
@@ -164,12 +171,12 @@ const Investment = () => {
         <div className="px-3 py-10 flex flex-col gap-3">
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Total Direct</p>
-            <p>0</p>
+            <p>{userProfileState?.referredUsers?.length || 0}</p>
           </div>
-          <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
+          {/* <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Total Downlines</p>
-            <p>0</p>
-          </div>
+            <p>{userProfileState?.referredUsers?.length +}</p>
+          </div> */}
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Total Business</p>
             <p>0</p>
@@ -185,11 +192,47 @@ const Investment = () => {
         </div>
       </div>
 
+      <div className="border-secondary rounded-md border">
+        <div className="bg-secondary text-white px-10 w-full py-3">
+          <p className="text-2xl font-semibold">Earning claims</p>
+        </div>
+        <div className="px-3 py-10 flex flex-col gap-3">
+          <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
+            <p>Total ROI Earned</p>
+            <p>{userProfileState?.balance}</p>
+            {/* <p>{userProfileState?.withdrawalHistory?.reduce((total, withdrawal) => total + withdrawal.amount, 0)}</p> */}
+          </div>
+          {/* <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
+            <p>Total Downlines</p>
+            <p>{userProfileState?.referredUsers?.length +}</p>
+          </div> */}
+          <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
+            <p>Available to claim</p>
+            <p>{userProfileState?.claimable}</p>
+          </div>
+          {/* <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
+            <p>Direct Volume</p>
+            <p>0</p>
+          </div>
+          <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
+            <p>Team Volume</p>
+            <p>0</p>
+          </div> */}
+          <button
+            onClick={claimEarnings}
+            // disabled={!userProfileState?.claimable || parseInt(userProfileState?.claimable) <= 0}
+            className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold`}
+          >
+            Claim
+          </button>
+        </div>
+      </div>
+
       <div className="w-full p-3 bg-light rounded-md flex flex-col gap-5">
         <p className="text-2xl font-semibold">Referral Link</p>
         <div className="flex flex-col md:flex-row gap-2">
-          <input type="text" className="w-full outline-none h-12 rounded-md px-3 border border-secondary" disabled />
-          <button className="flex justify-center w-full md:w-fit px-8 rounded-md py-2 bg-secondary text-white mb-5 text-lg font-semibold">Copy</button>
+          <input value={userProfileState && `https://gptbots.pro?ref=${userProfileState.referralCode}`} type="text" className="w-full text-center font-semibold outline-none h-12 rounded-md px-3 border border-secondary" disabled />
+          <button onClick={copyToClipBoard} className="flex justify-center w-full md:w-fit px-8 rounded-md py-2 bg-secondary text-white mb-5 text-lg font-semibold">Copy</button>
         </div>
       </div>
     </div>
