@@ -56,7 +56,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
     }
   }
 
-  const userLogin = async (wallet: string, ref?: string) => {
+  const userLogin = async (wallet: string, ref?: string):Promise<boolean> => {
     const request = await fetch(`${BASEURL}/user/register`, {
       method: "POST",
       headers: {
@@ -68,7 +68,9 @@ export const CreateGlobalContext = ({ children }: Props) => {
     // console.log(response);
     if(request.ok) {
       localStorage.setItem("user", JSON.stringify(response.token));
+      return true;
     }
+    return false;
   }
 
   const withdrawalHistory = async () => {

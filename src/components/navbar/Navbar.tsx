@@ -28,7 +28,7 @@ const Navbar = () => {
           toast.loading(message);
   
           // Attempt to sign in with the user's wallet
-          await userLogin(address as string, ref ? ref : undefined);
+          const loggedIn = await userLogin(address as string, ref ? ref : undefined);
           
           toast.dismiss();
           toast.success("Wallet connected successfully");
@@ -65,7 +65,7 @@ const Navbar = () => {
       <div className="flex items-center space-x-4">
         <div className=" text-white font-bold text-2xl">GPT Bot</div>
       </div>
-      <div className={`my-auto flex cursor-pointer md:flex-row flex-col gap-5 text-white font-semibold text-lg bg-primary md:bg-transparent duration-200 absolute md:relative w-full md:w-fit left-0 md:left-auto ${navOpen ? "top-14" : "top-[-1000px]"} px-6 md:px-0 py-10 md:py-0 md:top-auto`}>
+      {isConnected && <div className={`my-auto flex cursor-pointer md:flex-row flex-col gap-5 text-white font-semibold text-lg bg-primary md:bg-transparent duration-200 absolute md:relative w-full md:w-fit left-0 md:left-auto ${navOpen ? "top-14" : "top-[-1000px]"} px-6 md:px-0 py-10 md:py-0 md:top-auto`}>
         {navList.map((item: NavLiistType, i: number) => (
           <Link
             to={item.path}
@@ -76,13 +76,25 @@ const Navbar = () => {
             {item.name}
           </Link>
         ))}
-      </div>
+      </div>}
       <div className="flex items-center space-x-4">
-        <ConnectButton showBalance={true} />
+        {isConnected ? (
+          <button
+        onClick={async () => {
+          await useDisconnect();
+          toast.success("Wallet disconnected successfully");
+        }}
+        className="text-white bg-red-500 px-4 py-2 rounded"
+          >
+        Disconnect
+          </button>
+        ) : (
+          <ConnectButton label="Connect" showBalance={false} />
+        )}
         <div onClick={() => setNavOpen(!navOpen)} className="flex text-white md:hidden">
           <IoMenu color="#ffff" size={25} />
         </div>
-      </div >
+      </div>
     </div >
   )
 }

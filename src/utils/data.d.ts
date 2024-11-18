@@ -5,7 +5,8 @@ export interface User {
   updatedAt: string;
   referralCode: string;
   balance: string;
-  claimable: string;
+  claimableROI: string;
+  claimableRef: string;
   status: string;
   referredBy: User | null;
   investments: Investment[];

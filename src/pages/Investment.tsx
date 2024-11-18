@@ -35,7 +35,7 @@ const Investment = () => {
     chainId: 97,
   })
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+  const { isLoading: isConfirming } =
     useWaitForTransactionReceipt({
       hash,
     })
@@ -200,27 +200,35 @@ const Investment = () => {
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Total ROI Earned</p>
             <p>{userProfileState?.balance}</p>
-            {/* <p>{userProfileState?.withdrawalHistory?.reduce((total, withdrawal) => total + withdrawal.amount, 0)}</p> */}
           </div>
-          {/* <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
-            <p>Total Downlines</p>
-            <p>{userProfileState?.referredUsers?.length +}</p>
-          </div> */}
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Available to claim</p>
-            <p>{userProfileState?.claimable}</p>
+            <p>{userProfileState?.claimableRef}</p>
           </div>
-          {/* <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
-            <p>Direct Volume</p>
-            <p>0</p>
-          </div>
-          <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
-            <p>Team Volume</p>
-            <p>0</p>
-          </div> */}
           <button
             onClick={claimEarnings}
-            // disabled={!userProfileState?.claimable || parseInt(userProfileState?.claimable) <= 0}
+            className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold`}
+          >
+            Withdraw
+          </button>
+        </div>
+      </div>
+
+      <div className="border-secondary rounded-md border">
+        <div className="bg-secondary text-white px-10 w-full py-3">
+          <p className="text-2xl font-semibold">Affliate Earning</p>
+        </div>
+        <div className="px-3 py-10 flex flex-col gap-3">
+          <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
+            <p>Total Affliate Earn</p>
+            <p>{userProfileState?.balance}</p>
+          </div>
+          <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
+            <p>Available to claim</p>
+            <p>{userProfileState?.claimableRef}</p>
+          </div>
+          <button
+            onClick={claimEarnings}
             className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold`}
           >
             Claim

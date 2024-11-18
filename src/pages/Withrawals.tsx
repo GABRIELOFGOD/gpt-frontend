@@ -5,7 +5,7 @@ import WithdrawalModal from "../components/WithrawalModal";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 const Withrawals = () => {
-  const { userWallet, withdrawalHistory, withdrawalHistoryState, earningHistory, earningHistoryState, getUserDownlines, downlines } = useGlobalContext();
+  const { userWallet, withdrawalHistory, withdrawalHistoryState, earningHistory, earningHistoryState } = useGlobalContext();
   const navigate = useNavigate();
   const [isWithdrawalModalOpen, setIsWithdrawalModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -35,7 +35,7 @@ const Withrawals = () => {
   useEffect(() => {
     withdrawalHistory();
     earningHistory();
-    getUserDownlines();
+    // getUserDownlines();
     if(!userWallet){
       // navigate("/");
     }
@@ -149,7 +149,7 @@ const Withrawals = () => {
           </button>
         </div>
       </div>
-      <div className="border-secondary rounded-md border">
+      {/* <div className="border-secondary rounded-md border">
         <div className="bg-secondary text-white px-10 w-full py-3">
           <p className="text-2xl font-semibold">Referral History</p>
         </div>
@@ -189,14 +189,14 @@ const Withrawals = () => {
               </tbody>
             </table>
           }
-          {/* <button
+          <button
             className={`flex justify-center w-full rounded-md bg-secondary py-2 text-white text-lg font-semibold`}
             onClick={closeModal}
           >
             Withdraw
-          </button> */}
+          </button>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }
