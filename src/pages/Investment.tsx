@@ -6,6 +6,7 @@ import { useGlobalContext } from "../components/context/GlobalContext";
 
 import { tokenAbi } from "../../testabi";
 import toast from "react-hot-toast";
+import WithrawalModal from "../components/WithrawalModal";
 
 const availableSub: number[] = [
   100, 300, 500, 1000, 3000, 5000, 10000, 25000, 50000, 100000
@@ -18,6 +19,7 @@ const Investment = () => {
   const { data: hash, writeContract, isPending, error } = useWriteContract()
   const [usdtBalance, setUsdtBalance] = useState<string>("0");
   const [bnbBalance, setbnbBalance] = useState<string>("0");
+  const [confirmWithdraw, setConfirmWithdraw] = useState<boolean>(false);
 
   const [isApproved, setIsApproved] = useState(false);
 
@@ -108,6 +110,10 @@ const Investment = () => {
     toast.success("Referral link copied to clipboard");
   }
 
+  const toggelConfirmWithdraw = () => {
+    setConfirmWithdraw(!confirmWithdraw);
+  }
+  
   return (
     <div className="px-3 md:px-52 flex flex-col gap-10 py-10 md:py-20">
       <div className="border-secondary rounded-md border">
@@ -203,10 +209,10 @@ const Investment = () => {
           </div>
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Available to claim</p>
-            <p>{userProfileState?.claimableRef}</p>
+            <p>{userProfileState?.balance}</p>
           </div>
           <button
-            onClick={claimEarnings}
+            onClick={toggelConfirmWithdraw}
             className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold`}
           >
             Withdraw
@@ -243,6 +249,7 @@ const Investment = () => {
           <button onClick={copyToClipBoard} className="flex justify-center w-full md:w-fit px-8 rounded-md py-2 bg-secondary text-white mb-5 text-lg font-semibold">Copy</button>
         </div>
       </div>
+      {confirmWithdraw && <WithrawalModal close={toggelConfirmWithdraw} />}
     </div>
   )
 }

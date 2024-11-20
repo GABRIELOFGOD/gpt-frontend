@@ -4,7 +4,8 @@ import { useState } from "react";
 
 const WithrawalModal = ({ close }: {close: () => void}) => {
   const { userProfileState, userWithdrawal } = useGlobalContext();
-  const [amount, setAmount] = useState<number>(0);
+  const [processing, setProcessing] = useState<boolean>(false);
+  // const [amount, setAmount] = useState<number>(0);
 
   const closeModal = (event: any) => {
     if(event.target.classList.contains('fixed')) {
@@ -13,7 +14,10 @@ const WithrawalModal = ({ close }: {close: () => void}) => {
   }
 
   const withdraw = () => {
-    userWithdrawal(amount);
+    setProcessing(true);
+    userWithdrawal(parseInt(userProfileState?.balance || "0"));
+    setProcessing(false);
+    close();
   }
   
   return (
@@ -26,28 +30,17 @@ const WithrawalModal = ({ close }: {close: () => void}) => {
           </button>
         </div>
         <div className="py-5">
-          <input
-            type="number"
-            placeholder="Enter amount"
-            className="w-full py-2 px-3 border-secondary border rounded-md"
-            value={amount}
-            onChange={(e) => setAmount(parseInt(e.target.value))}
-          />
-          <div className="w-full flex  justify-end px-3 py-2">
-            <p className="text-xs text-secondary text-opacity-20 font-[500]">
-              Withdrawable amount: 
-              {userProfileState && userProfileState.balance !== undefined && userProfileState.investments 
-                ? parseInt(userProfileState?.balance) - userProfileState.investments.reduce((amount, investment) => amount + investment.amount, 0) 
-                : 0}
-            </p>
+          <p>Are you sure you want to process withdrawal?</p>
+          <div className="flex">
+            <button 
+              onClick={withdraw} 
+              className="bg-primary text-white px-5 py-2 rounded mt-5"
+              disabled={processing}
+            >
+              {processing ? "Processing..." : "Yes"}
+            </button>
+            <button onClick={close} className="bg-red-500 text-white px-5 py-2 rounded mt-5 ml-5">No</button>
           </div>
-          <button
-            onClick={withdraw}
-            disabled={amount < 10 || amount > parseInt(userProfileState?.balance || "0")}
-            className="flex disabled:bg-opacity-10 justify-center w-full rounded-md bg-secondary py-2 text-white text-lg font-semibold"
-          >
-            Withdraw
-          </button>
         </div>
       </div>
     </div>

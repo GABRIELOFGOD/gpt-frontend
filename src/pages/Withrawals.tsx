@@ -60,6 +60,9 @@ const Withrawals = () => {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Date
                   </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-secondary">
@@ -68,8 +71,11 @@ const Withrawals = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
                       {withdrawal.amount}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
-                      {withdrawal.createdAt}
+                    <td className="px-6 py-4 whitespace-nowrap text-[8px] text-secondary">
+                      {dateFormatter(withdrawal.createdAt)}
+                    </td>
+                    <td className={`px-6 py-4 whitespace-nowrap text-sm ${withdrawal.status == "processing" ? "text-yellow-500" : "text-green-500"} `}>
+                      {withdrawal.status}
                     </td>
                   </tr>
                 ))}

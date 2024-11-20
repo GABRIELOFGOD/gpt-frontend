@@ -14,6 +14,7 @@ const Navbar = () => {
   // const { signMessage } = useSignMessage();
   const navigate = useNavigate();
   const { setUserWallet, userLogin, userProfile } = useGlobalContext();
+  const { disconnect } = useDisconnect();
 
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -29,16 +30,17 @@ const Navbar = () => {
   
           // Attempt to sign in with the user's wallet
           const loggedIn = await userLogin(address as string, ref ? ref : undefined);
+          if(!loggedIn) disconnect();
           
           toast.dismiss();
           toast.success("Wallet connected successfully");
-          // navigate('/investments');
+          if(location.pathname == "/") navigate('/investments');
         } catch (error) {
           // Handle the error (e.g., failed login)
           console.error("Error signing message:", error);
           
           // Disconnect the wallet if login fails
-          await useDisconnect(); // Disconnect the wallet
+          await disconnect(); // Disconnect the wallet
           toast.dismiss();
           toast.error("Failed to connect wallet. Please try again.");
           navigate('/'); // Redirect user to home or login page
@@ -81,7 +83,7 @@ const Navbar = () => {
         {isConnected ? (
           <button
         onClick={async () => {
-          await useDisconnect();
+          await disconnect();
           toast.success("Wallet disconnected successfully");
         }}
         className="text-white bg-red-500 px-4 py-2 rounded"

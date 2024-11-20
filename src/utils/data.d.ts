@@ -26,6 +26,7 @@ export interface Withdrawal {
   id: number;
   amount: number;
   status?: string;
+  user?: User;
   createdAt: string;
   updatedAt?: string;
 }

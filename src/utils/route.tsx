@@ -4,6 +4,7 @@ import Home from '../pages/Home';
 import Withrawals from '../pages/Withrawals';
 import ReferralHistory from '../pages/ReferralHistory';
 import Investment from '../pages/Investment';
+import Admin from '../pages/Admin';
 
 const route = createBrowserRouter([
   {
@@ -25,6 +26,10 @@ const route = createBrowserRouter([
       {
         path: "referral-history",
         element: <ReferralHistory />
+      },
+      {
+        path: "admin",
+        element: <Admin />
       }
     ]
   }

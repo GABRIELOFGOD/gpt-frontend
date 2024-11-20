@@ -6,7 +6,7 @@ import { EarningHistory, User, Withdrawal } from "../../utils/data";
 interface GlobalContextType {
   userWallet: string;
   setUserWallet: (wallet: string) => void;
-  userLogin: (wallet: string, ref?: string) => void;
+  userLogin: (wallet: string, ref?: string) => Promise<boolean>;
   userInvestment: (amount: number) => void;
   withdrawalHistory: () => void;
   withdrawalHistoryState: Withdrawal[];
@@ -18,6 +18,11 @@ interface GlobalContextType {
   earningHistoryState: EarningHistory[];
   getUserDownlines: () => void;
   downlines: User[];
+  allUsers: () => void;
+  allUsersState: User[];
+  withdrawalsState: Withdrawal[];
+  withdrawalsForAdmin: () => void;
+  approveWithdrawal: (id: number) => void;
 }
 
 const GlobalContext = createContext<GlobalContextType | null>(null);
@@ -27,8 +32,8 @@ interface Props {
 }
 
 export const CreateGlobalContext = ({ children }: Props) => {
-  const BASEURL = "http://localhost:8000/api/v1";
-  // const BASEURL = "https://api.gptbots.pro/api/v1";
+  // const BASEURL = "http://localhost:8000/api/v1";
+  const BASEURL = "https://api.gptbots.pro/api/v1";
   const [userWallet, setUserWallet] = useState<string>("");
   const [withdrawalHistoryState, setWithdrawalHistory] = useState<Withdrawal[]>([]);
   const [userProfileState, setUserProfile] = useState<User>();
@@ -194,6 +199,68 @@ export const CreateGlobalContext = ({ children }: Props) => {
   }
 
 
+
+  // ============================== ADMIN ============================== //
+  const [allUsersState, setAllUsers] = useState<User[]>([]);
+
+  const allUsers = async () => {
+    const request = await fetch(`${BASEURL}/user`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${JSON.parse(localStorage.getItem("user") as string)}`,
+      },
+    });
+    const response = await request.json();
+    if(!request.ok) {
+      toast.error(response.message);
+    }
+    if(request.ok) {
+      setAllUsers(response.users);
+    }
+  }
+
+  // ========= WITHDRAWALS ========= //
+  const [withdrawalsState, setWithdrawals] = useState<Withdrawal[]>([]);
+  const withdrawalsForAdmin = async () => {
+    const request = await fetch(`${BASEURL}/user/withdrawal`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${JSON.parse(localStorage.getItem("user") as string)}`,
+      },
+    });
+    const response = await request.json();
+    console.log("All withdrawals", response);
+    if(!request.ok) {
+      toast.error(response.message);
+    }
+    if(request.ok) {
+      setWithdrawals(response.withdrawals);
+    }
+  }
+
+  // ======= APPROVE WITHDRAWAL ========= //
+  const approveWithdrawal = async (id: number) => {
+    const request = await fetch(`${BASEURL}/user/withdrawal/approve`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${JSON.parse(localStorage.getItem("user") as string)}`,
+      },
+      body: JSON.stringify({ withdrawalId: id }),
+    });
+    const response = await request.json();
+    console.log(response);
+    if(!request.ok) {
+      toast.error(response.message);
+    }
+    if(request.ok) {
+      toast.success(response.message);
+    }
+  }
+
+
   return (
     <GlobalContext.Provider value={{
         userWallet,
@@ -210,6 +277,11 @@ export const CreateGlobalContext = ({ children }: Props) => {
         earningHistoryState,
         getUserDownlines,
         downlines,
+        allUsers,
+        allUsersState,
+        withdrawalsState,
+        withdrawalsForAdmin,
+        approveWithdrawal,
       }}
     >
       {children}
