@@ -5,6 +5,8 @@ import Withrawals from '../pages/Withrawals';
 import ReferralHistory from '../pages/ReferralHistory';
 import Investment from '../pages/Investment';
 import Admin from '../pages/Admin';
+import Swap from '../pages/Swap';
+import Game from '../pages/Game';
 
 const route = createBrowserRouter([
   {
@@ -30,6 +32,14 @@ const route = createBrowserRouter([
       {
         path: "admin",
         element: <Admin />
+      },
+      {
+        path: "swap",
+        element: <Swap />
+      },
+      {
+        path: "games",
+        element: <Game />
       }
     ]
   }

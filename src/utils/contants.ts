@@ -15,5 +15,13 @@ export const navList: NavLiistType[] = [
   {
     path: "/withdrawals",
     name: "Withdrawals"
+  },
+  {
+    path: "/games",
+    name: "Game"
+  },
+  {
+    path: "/swap",
+    name: "Swap"
   }
 ]
