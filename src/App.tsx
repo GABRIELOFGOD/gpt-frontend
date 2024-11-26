@@ -14,6 +14,7 @@ import {
   bscTestnet
 } from 'wagmi/chains';
 import route from './utils/route';
+import { CreateGlobalContext } from './components/context/GlobalContext';
 
 
 function App() {
@@ -31,7 +32,9 @@ function App() {
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider>
-            <RouterProvider router={route} />
+            <CreateGlobalContext>
+              <RouterProvider router={route} />
+            </CreateGlobalContext>
           </RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>

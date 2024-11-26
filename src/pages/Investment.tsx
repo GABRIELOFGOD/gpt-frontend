@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useBalance, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { useAccount, useBalance, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { contractAbi } from "../../abi";
 import { useGlobalContext } from "../components/context/GlobalContext";
 
 import { tokenAbi } from "../../testabi";
 import toast from "react-hot-toast";
 import WithrawalModal from "../components/WithrawalModal";
+import useInvestment from "../hooks/InvestmentHook";
 
 const availableSub: number[] = [
   100, 300, 500, 1000, 3000, 5000, 10000, 25000, 50000, 100000
@@ -20,6 +21,8 @@ const Investment = () => {
   const [usdtBalance, setUsdtBalance] = useState<string>("0");
   const [bnbBalance, setbnbBalance] = useState<string>("0");
   const [confirmWithdraw, setConfirmWithdraw] = useState<boolean>(false);
+
+  const { isConnected } = useAccount();
 
   const [isApproved, setIsApproved] = useState(false);
 
@@ -77,33 +80,55 @@ const Investment = () => {
       });
 
       setIsApproved(true);
+      // await handleDeposit();
 
     } catch (error) {
+      toast.error("Approval failed");
       console.error("Approval failed:", error);
+      throw error;
     }
   };
 
+  const { invest, error: investmentError, isLoading: isInvesting } = useInvestment();
+
+  if (investmentError) {
+    console.log('Investment error:', investmentError);
+    toast.error(investmentError);
+  }
+
   const handleDeposit = async () => {
     if (!selectedAmount || !isApproved) return;
-
+  
     try {
-      writeContract({
+      // Wait for the writeContract function to complete
+      const txResult = await writeContract({
         ...contractAbi,
         address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23',
         functionName: 'deposit',
         args: [BigInt(selectedAmount * 1e18)],
       });
-
+  
+      console.log("Transaction successful:", txResult);
+  
+      // Clear state variables after successful transaction
       setSelectedAmount(0);
       setIsApproved(false);
-
-      // todo add link backend here
-      await userInvestment(selectedAmount);
-
+  
+      // Link to backend for further investment handling
+      const investmentResponse = await invest(selectedAmount);
+      console.log("Investment response:", investmentResponse);
+  
+      if (investmentResponse.status === "fail") {
+        return toast.error(investmentResponse.message);
+      } else {
+        toast.success(investmentResponse.message);
+      }
     } catch (error) {
+      toast.error("Deposit failed");
       console.error("Deposit failed:", error);
     }
   };
+  
 
   const copyToClipBoard = () => {
     navigator.clipboard.writeText(`https://gptbots.pro?ref=${userProfileState?.referralCode}`);
@@ -122,7 +147,10 @@ const Investment = () => {
       <div className="flex gap-3 bg-light py-5">
         <img src="/static/8.png" className="w-[100px]" alt="GPTBOT" />
         <div className="flex flex-col gap-3">
-          <p className="text-2xl text-secondary font-bold">Hello!, Welcome to GPTBOT</p>
+          <p className="md:text-2xl text-lg text-secondary font-bold">Hello!, Welcome to GPTBOT</p>
+          <p className="text-xs font-semibold">{userProfileState?.name}</p>
+          <p className="text-xs font-semibold">{userProfileState?.phone}</p>
+          <p className="text-xs font-semibold">{userProfileState?.email}</p>
         </div>
       </div>
       <div className="border-secondary rounded-md border">
@@ -152,6 +180,7 @@ const Investment = () => {
               value={selectedAmount}
               onChange={(e) => setSelectedAmount(Number(e.target.value))}
             >
+              <option className="text-neutral-200 cursor-not-allowed" value="">-- SELECT AN AMOUNT TO INVEST --</option>
               {availableSub.map((sub, index) => (
                 <option key={index} value={sub}>{sub}</option>
               ))}
@@ -171,23 +200,22 @@ const Investment = () => {
               <p>{userProfileState?.investments.reduce((total, investment) => total + investment.amount, 0)}</p>
             </div>
           </div>
-          {!isApproved ? (
-            <button
-              onClick={handleApprove}
-              disabled={!selectedAmount || isPending || isConfirming}
-              className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold ${(!selectedAmount || isPending || isConfirming) ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isPending || isConfirming ? "Approving..." : "Approve USDT"}
-            </button>
-          ) : (
-            <button
-              onClick={handleDeposit}
-              disabled={isPending || isConfirming}
-              className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold ${(isPending || isConfirming) ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isPending || isConfirming ? "Depositing..." : "Deposit"}
-            </button>
-          )}
+          { !isConnected ? <button className="w-full text-neutral-300 bg-lime-50 py-2 rounded-md">Connect wallet to invests</button>
+            : !isApproved ? <button
+            onClick={handleApprove}
+            disabled={!selectedAmount || isPending || isConfirming || isInvesting}
+            className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold ${(!selectedAmount || isPending || isConfirming || isInvesting) ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isPending || isConfirming || isInvesting ? "Approving..." : "Invest USDT"}
+          </button> :
+          <button
+            onClick={handleDeposit}
+            disabled={!selectedAmount || isPending || isConfirming || isInvesting}
+            className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold ${(!selectedAmount || isPending || isConfirming || isInvesting) ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isPending || isConfirming || isInvesting ? "Investing..." : "Invest USDT"}
+          </button>
+          }
         </div>
       </div>
 

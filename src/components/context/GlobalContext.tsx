@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 import toast from "react-hot-toast";
 import { EarningHistory, User, Withdrawal } from "../../utils/data";
+import { useDisconnect } from "wagmi";
 
 
 interface GlobalContextType {
@@ -23,6 +24,10 @@ interface GlobalContextType {
   withdrawalsState: Withdrawal[];
   withdrawalsForAdmin: () => void;
   approveWithdrawal: (id: number) => void;
+  authenticated: boolean;
+  setAuthenticated: (auth: boolean) => void;
+  generalLoading: boolean;
+  setGeneralLoading: (loading: boolean) => void;
 }
 
 const GlobalContext = createContext<GlobalContextType | null>(null);
@@ -31,15 +36,19 @@ interface Props {
   children: ReactNode;
 }
 
+export const BASEURL = "http://localhost:8000/api/v1";
+// export const BASEURL = "https://api.gptbots.pro/api/v1";
 export const CreateGlobalContext = ({ children }: Props) => {
-  // const BASEURL = "http://localhost:8000/api/v1";
-  const BASEURL = "https://api.gptbots.pro/api/v1";
   const [userWallet, setUserWallet] = useState<string>("");
   const [withdrawalHistoryState, setWithdrawalHistory] = useState<Withdrawal[]>([]);
   const [userProfileState, setUserProfile] = useState<User>();
   const [earningHistoryState, setEarningHistory] = useState<EarningHistory[]>([]);
   const [downlines, setDownlines] = useState<User[]>([]);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [generalLoading, setGeneralLoading] = useState(false);
   // const userWallet: string = "0x7b49660dc6F25326d2fA7C3CD67970dF73eB5Ec1";
+
+  const { disconnect } = useDisconnect();
 
   const userInvestment = async (amount: number) => {
     console.log(localStorage.getItem("user"));
@@ -98,6 +107,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
 
   // ========================= USER PROFILE ========================= //
   const userProfile = async () => {
+    setGeneralLoading(true);
     const request = await fetch(`${BASEURL}/user/profile`, {
       method: "GET",
       headers: {
@@ -108,10 +118,16 @@ export const CreateGlobalContext = ({ children }: Props) => {
     const response = await request.json();
     console.log(response);
     if(!request.ok) {
+      disconnect();
+      setAuthenticated(false);
+      localStorage.removeItem("user");
       toast.error(response.message);
+      setGeneralLoading(false);
     }
     if(request.ok) {
+      setAuthenticated(true);
       setUserProfile(response.user);
+      setGeneralLoading(false);
     }
   }
 
@@ -282,6 +298,10 @@ export const CreateGlobalContext = ({ children }: Props) => {
         withdrawalsState,
         withdrawalsForAdmin,
         approveWithdrawal,
+        authenticated,
+        setAuthenticated,
+        generalLoading,
+        setGeneralLoading,
       }}
     >
       {children}

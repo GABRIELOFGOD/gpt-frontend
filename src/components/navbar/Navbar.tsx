@@ -1,66 +1,66 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IoMenu } from "react-icons/io5";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAccount, useDisconnect } from 'wagmi';
 import { NavLiistType, navList } from "../../utils/contants";
-import { useGlobalContext } from "../context/GlobalContext";
+// import { useGlobalContext } from "../context/GlobalContext";
 import toast from "react-hot-toast";
-import { useLocation } from "react-router-dom";
+// import { useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const [navOpen, setNavOpen] = useState(false);
-  const { isConnected, connector, address } = useAccount();
+  const { isConnected } = useAccount();
   // const { signMessage } = useSignMessage();
-  const navigate = useNavigate();
-  const { setUserWallet, userLogin, userProfile } = useGlobalContext();
+  // const navigate = useNavigate();
+  // const { setUserWallet, userLogin, userProfile } = useGlobalContext();
   const { disconnect } = useDisconnect();
 
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const ref = queryParams.get('ref');
+  // const location = useLocation();
+  // const queryParams = new URLSearchParams(location.search);
+  // const ref = queryParams.get('ref');
 
-  useEffect(() => {
-    const handleSignMessage = async () => {
-      if (isConnected) {
-        const message = "Please sign this message to verify your wallet ownership.";
-        console.log("Query params", ref);
-        try {
-          toast.loading(message);
+  // useEffect(() => {
+  //   const handleSignMessage = async () => {
+  //     if (isConnected) {
+  //       const message = "Please sign this message to verify your wallet ownership.";
+  //       console.log("Query params", ref);
+  //       try {
+  //         toast.loading(message);
   
-          // Attempt to sign in with the user's wallet
-          const loggedIn = await userLogin(address as string, ref ? ref : undefined);
-          if(!loggedIn) disconnect();
+  //         // Attempt to sign in with the user's wallet
+  //         const loggedIn = await userLogin(address as string, ref ? ref : undefined);
+  //         if(!loggedIn) disconnect();
           
-          toast.dismiss();
-          toast.success("Wallet connected successfully");
-          if(location.pathname == "/") navigate('/investments');
-        } catch (error) {
-          // Handle the error (e.g., failed login)
-          console.error("Error signing message:", error);
+  //         toast.dismiss();
+  //         toast.success("Wallet connected successfully");
+  //         if(location.pathname == "/") navigate('/investments');
+  //       } catch (error) {
+  //         // Handle the error (e.g., failed login)
+  //         console.error("Error signing message:", error);
           
-          // Disconnect the wallet if login fails
-          await disconnect(); // Disconnect the wallet
-          toast.dismiss();
-          toast.error("Failed to connect wallet. Please try again.");
-          navigate('/'); // Redirect user to home or login page
-        }
-      }
-    };
+  //         // Disconnect the wallet if login fails
+  //         await disconnect(); // Disconnect the wallet
+  //         toast.dismiss();
+  //         toast.error("Failed to connect wallet. Please try again.");
+  //         navigate('/'); // Redirect user to home or login page
+  //       }
+  //     }
+  //   };
   
-    // Only call handleSignMessage if the connector is available
-    if (connector) {
-      handleSignMessage();
-    }
-  }, [address, isConnected, connector, userLogin, navigate]);
+  //   // Only call handleSignMessage if the connector is available
+  //   if (connector) {
+  //     handleSignMessage();
+  //   }
+  // }, [address, isConnected, connector, userLogin, navigate]);
 
   // Effect to update the global context when the wallet is connected
-  useEffect(() => {
-    if (isConnected && address) {
-      setUserWallet(address);
-    }
-    userProfile();
-  }, [isConnected, address, setUserWallet]);
+  // useEffect(() => {
+  //   if (isConnected && address) {
+  //     setUserWallet(address);
+  //   }
+  //   userProfile();
+  // }, [isConnected, address, setUserWallet]);
 
   return (
     <div className="flex bg-secondary top-0 sticky z-50 justify-between py-2 px-6 shadow-sm">

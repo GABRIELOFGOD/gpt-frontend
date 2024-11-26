@@ -5,6 +5,7 @@ export interface User {
   updatedAt: string;
   referralCode: string;
   balance: string;
+  gptBalance: string;
   claimableROI: string;
   claimableRef: string;
   status: string;
@@ -13,6 +14,9 @@ export interface User {
   withdrawalHistory: Withdrawal[];
   claims: Claims[];
   referredUsers: User[];
+  name: string;
+  email: string;
+  phone: string;
 }
 
 export interface Investment {
@@ -45,6 +49,13 @@ export interface EarningHistory {
   date: string;
 }
 
+export interface RegisterData {
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  referralCode: string;
+}
 
 // {
 //   "id": 1,
