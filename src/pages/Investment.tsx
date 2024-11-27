@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAccount, useBalance, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { contractAbi } from "../../abi";
 import { useGlobalContext } from "../components/context/GlobalContext";
@@ -8,19 +8,23 @@ import { tokenAbi } from "../../testabi";
 import toast from "react-hot-toast";
 import WithrawalModal from "../components/WithrawalModal";
 import useInvestment from "../hooks/InvestmentHook";
+// import useEarning from "../hooks/userHook";
+import useClaim from "../hooks/ClaimHook";
 
 const availableSub: number[] = [
   100, 300, 500, 1000, 3000, 5000, 10000, 25000, 50000, 100000
 ]
 
 const Investment = () => {
-  const { userWallet, userInvestment, userProfileState, claimEarnings } = useGlobalContext();
+  const { userWallet, userProfileState } = useGlobalContext();
   const navigate = useNavigate();
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
   const { data: hash, writeContract, isPending, error } = useWriteContract()
   const [usdtBalance, setUsdtBalance] = useState<string>("0");
   const [bnbBalance, setbnbBalance] = useState<string>("0");
   const [confirmWithdraw, setConfirmWithdraw] = useState<boolean>(false);
+
+  const [hasDeposited, setHasDeposited] = useState<boolean>(false);
 
   const { isConnected } = useAccount();
 
@@ -90,44 +94,104 @@ const Investment = () => {
   };
 
   const { invest, error: investmentError, isLoading: isInvesting } = useInvestment();
+  const { claimRef, claimRoi, isLoading: claimLoading, error: claimError } = useClaim()
+  // const { userEarnings, getCummulativeROI, getCummulativeReferral, earnings } = useEarning();
+
+  if(claimError) {
+    console.log('Claim error:', claimError);
+    toast.error(claimError);
+  }
 
   if (investmentError) {
     console.log('Investment error:', investmentError);
     toast.error(investmentError);
   }
 
-  const handleDeposit = async () => {
+  const handleDeposit = () => {
     if (!selectedAmount || !isApproved) return;
   
     try {
       // Wait for the writeContract function to complete
-      const txResult = await writeContract({
+      writeContract({
         ...contractAbi,
         address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23',
         functionName: 'deposit',
         args: [BigInt(selectedAmount * 1e18)],
       });
-  
-      console.log("Transaction successful:", txResult);
-  
+    
       // Clear state variables after successful transaction
       setSelectedAmount(0);
       setIsApproved(false);
+      setHasDeposited(true);
   
       // Link to backend for further investment handling
-      const investmentResponse = await invest(selectedAmount);
+      
+    } catch (error) {
+      toast.error("Deposit failed");
+      console.error("Deposit failed:", error);
+    }
+  };
+
+  const handleBackendCall = async () => {
+    const investmentResponse = await invest(selectedAmount);
       console.log("Investment response:", investmentResponse);
   
       if (investmentResponse.status === "fail") {
         return toast.error(investmentResponse.message);
       } else {
         toast.success(investmentResponse.message);
+        location.reload();
+      }
+  };
+  // const [totalROI, setTotalROI] = useState<number>(0);
+  // const [totalReferral, setTotalReferral] = useState<number>(0);
+
+  // useEffect(() => {
+  //   userEarnings();
+  // },[])
+
+  // useEffect(() => {
+  //   if(earnings) {
+  //     setTotalROI(getCummulativeROI());
+  //     setTotalReferral(getCummulativeReferral());
+  //   }
+  // },[earnings])
+
+  const claimRoiEarning = async () => {
+    try {
+      const roiRes = await claimRoi();
+      console.log(roiRes);
+      if(roiRes.status && roiRes.status === "fail") {
+        toast.error(roiRes.message);
+      } else {
+        toast.success(roiRes.message);
+        location.reload();
       }
     } catch (error) {
-      toast.error("Deposit failed");
-      console.error("Deposit failed:", error);
+      toast.error("Failed to claim ROI earnings");
     }
-  };
+  }
+
+  const claimRefEarnings = async () => {
+    try {
+      const refRes = await claimRef();
+      console.log(refRes);
+      if(refRes.status && refRes.status === "fail") {
+        toast.error(refRes.message);
+      } else {
+        toast.success(refRes.message);
+        location.reload();
+      }
+    } catch (error) {
+      toast.error("Failed to claim Referral earnings");
+    }
+  }
+
+  useEffect(() => {
+    if(isApproved && hasDeposited) {
+      handleBackendCall();
+    }
+  }, [hash, isApproved, hasDeposited]);
   
 
   const copyToClipBoard = () => {
@@ -138,19 +202,23 @@ const Investment = () => {
   const toggelConfirmWithdraw = () => {
     setConfirmWithdraw(!confirmWithdraw);
   }
+
+  const toTwoDecimalPlaces = (num: number): string => {
+    return num.toFixed(2);
+  };
   
   return (
     <div className="px-3 md:px-52 flex flex-col gap-10 py-10 md:py-20">
       <div className="fixed top-0 left-0 w-full h-screen -z-20">
-        <img src="/images/bg.avif" className="h-full" alt="background image" />
+        <img src="/images/bg.avif" className="h-full w-full" alt="background image" />
       </div>
       <div className="flex gap-3 bg-light py-5">
         <img src="/static/8.png" className="w-[100px]" alt="GPTBOT" />
         <div className="flex flex-col gap-3">
           <p className="md:text-2xl text-lg text-secondary font-bold">Hello!, Welcome to GPTBOT</p>
-          <p className="text-xs font-semibold">{userProfileState?.name}</p>
-          <p className="text-xs font-semibold">{userProfileState?.phone}</p>
-          <p className="text-xs font-semibold">{userProfileState?.email}</p>
+          <p className="text-xs font-semibold">Name: <span>{userProfileState?.name}</span></p>
+          <p className="text-xs font-semibold">Phone: <span>{userProfileState?.phone}</span></p>
+          <p className="text-xs font-semibold">Email: <span>{userProfileState?.email}</span></p>
         </div>
       </div>
       <div className="border-secondary rounded-md border">
@@ -228,11 +296,11 @@ const Investment = () => {
         <div className="px-3 py-10 bg-white flex gap-3">
           <div className="flex-1">
             <div className=" flex flex-col bg-light p-2 rounded-md">
-              <div className="flex gap-2">
+              <div className="flex gap-2 pt-5 w-full justify-center">
                 <img src="/static/2.png" className="w-[40px]" alt="coin icon" />
-                <p className="font-bold text-3xl">USDT</p>
+                <p className="font-bold md:text-3xl text-2xl">USDT</p>
               </div>
-              <div className="text-2xl text-center font-semibold">100 USDT</div>
+              <div className="md:text-2xl py-5 text-center font-semibold">{toTwoDecimalPlaces(parseFloat(userProfileState?.balance  || "0"))} USDT</div>
             </div>
             <div className="flex w-full justify-center py-4">
               <button className="bg-green-700 text-white font-semibold text-lg rounded-full py-1 px-4">Withdraw</button>
@@ -241,11 +309,11 @@ const Investment = () => {
 
           <div className="flex-1">
             <div className=" flex flex-col bg-light p-2 rounded-md">
-              <div className="flex gap-2">
+              <div className="flex gap-2 pt-5 w-full justify-center">
                 <img src="/static/3.png" className="w-[40px]" alt="coin icon" />
-                <p className="font-bold text-3xl">GPTCOIN</p>
+                <p className="font-bold md:text-3xl text-2xl">GPTCOIN</p>
               </div>
-              <div className="text-2xl text-center font-semibold">100 GPT</div>
+              <div className="md:text-2xl py-5 text-center font-semibold">{toTwoDecimalPlaces(parseFloat(userProfileState?.gptBalance  || "0"))} GPT</div>
             </div>
             <div className="flex w-full justify-center py-4">
               <button className="bg-yellow-600 text-white font-semibold text-lg rounded-full py-1 px-4">Withdraw</button>
@@ -255,11 +323,11 @@ const Investment = () => {
         </div>
       </div>
 
-      <div className="flex gap-3 bg-secondary rounded-full w-full justify-center items-center py-3">
+      <Link to="/swap" className="flex gap-3 bg-secondary rounded-full w-full justify-center items-center py-3">
         <img src="/icons/4.gif" alt="Investment GIF" className="w-[50px] h-full" />
         <p className="text-2xl text-white my-auto font-semibold">GPT SWAP</p>
         <img src="/icons/2.gif" alt="Investment GIF" className="w-[50px] h-full" />
-      </div>
+      </Link>
 
       <div className="w-full p-3 bg-light rounded-md flex flex-col gap-5">
         <div className="flex gap-2">
@@ -267,7 +335,7 @@ const Investment = () => {
           <p className="text-2xl my-auto font-semibold">Referral Link</p>
         </div>
         <div className="flex flex-col md:flex-row gap-2">
-          <input value={userProfileState && `https://gptbots.pro?ref=${userProfileState.referralCode}`} type="text" className="w-full text-center font-semibold outline-none h-12 rounded-md px-3 border border-secondary" disabled />
+          <input value={userProfileState && `https://app.gptbots.pro/investments?ref=${userProfileState.referralCode}`} type="text" className="w-full text-center font-semibold outline-none h-12 rounded-md px-3 border border-secondary" disabled />
           <button onClick={copyToClipBoard} className="flex justify-center w-full md:w-fit px-8 rounded-md py-2 bg-secondary text-white mb-5 text-lg font-semibold">Copy</button>
         </div>
       </div>
@@ -316,19 +384,19 @@ const Investment = () => {
           <p className="text-2xl my-auto font-semibold">Earning claims</p>
         </div>
         <div className="px-3 py-10 bg-white flex flex-col gap-3">
-          <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
+          {/* <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Total ROI Earned</p>
-            <p>{userProfileState?.balance}</p>
-          </div>
+            <p>{totalROI}</p>
+          </div> */}
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Available to claim</p>
-            <p>{userProfileState?.balance}</p>
+            <p>{userProfileState?.claimableROI}</p>
           </div>
           <button
-            onClick={toggelConfirmWithdraw}
-            className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold`}
+            onClick={claimRoiEarning}
+            className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold ${claimLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            claim
+            {claimLoading ? "Claiming..." : "Claim"}
           </button>
         </div>
       </div>
@@ -339,19 +407,19 @@ const Investment = () => {
           <p className="text-2xl my-auto font-semibold">Affliate Earning</p>
         </div>
         <div className="px-3 py-10 flex bg-white flex-col gap-3">
-          <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
+          {/* <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Total Affliate Earn</p>
-            <p>{userProfileState?.balance}</p>
-          </div>
+            <p>{totalReferral}</p>
+          </div> */}
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Available to claim</p>
             <p>{userProfileState?.claimableRef}</p>
           </div>
           <button
-            onClick={claimEarnings}
-            className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold`}
+            onClick={claimRefEarnings}
+            className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold ${claimLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            Claim
+            {claimLoading ? "Claiming..." : "Claim"}
           </button>
         </div>
       </div>

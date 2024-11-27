@@ -57,6 +57,17 @@ export interface RegisterData {
   referralCode: string;
 }
 
+export interface Token {
+  name: string;
+  image: string;
+  rate: number;
+}
+
+export interface SwapData {
+  amount: number;
+  to: "USDT" | "GPT";
+}
+
 // {
 //   "id": 1,
 //   "amountEarned": "1.0000",

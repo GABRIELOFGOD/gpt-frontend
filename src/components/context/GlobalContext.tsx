@@ -36,8 +36,8 @@ interface Props {
   children: ReactNode;
 }
 
-export const BASEURL = "http://localhost:8000/api/v1";
-// export const BASEURL = "https://api.gptbots.pro/api/v1";
+// export const BASEURL = "http://localhost:8000/api/v1";
+export const BASEURL = "https://api.gptbots.pro/api/v1";
 export const CreateGlobalContext = ({ children }: Props) => {
   const [userWallet, setUserWallet] = useState<string>("");
   const [withdrawalHistoryState, setWithdrawalHistory] = useState<Withdrawal[]>([]);

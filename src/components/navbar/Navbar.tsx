@@ -16,6 +16,13 @@ const Navbar = () => {
   // const { setUserWallet, userLogin, userProfile } = useGlobalContext();
   const { disconnect } = useDisconnect();
 
+  const logout = async () => {
+    await disconnect();
+    localStorage.removeItem("user");
+    toast.success("Logout successful");
+    location.reload();
+  };
+
   // const location = useLocation();
   // const queryParams = new URLSearchParams(location.search);
   // const ref = queryParams.get('ref');
@@ -68,7 +75,7 @@ const Navbar = () => {
         <img className="w-[50px]" src="/static/3.png" alt="Logo" />
         <p className=" text-white my-auto font-bold text-2xl">GPT Bot</p>
       </div>
-      {isConnected && <div className={`my-auto flex cursor-pointer md:flex-row flex-col gap-5 text-white font-semibold text-lg bg-primary md:bg-transparent duration-200 absolute md:relative w-full md:w-fit left-0 md:left-auto ${navOpen ? "top-14" : "top-[-1000px]"} px-6 md:px-0 py-10 md:py-0 md:top-auto`}>
+      <div className={`my-auto flex cursor-pointer md:flex-row flex-col gap-5 text-white font-semibold text-lg bg-primary md:bg-transparent duration-200 absolute md:relative w-full md:w-fit left-0 md:left-auto ${navOpen ? "top-14" : "top-[-1000px]"} px-6 md:px-0 py-10 md:py-0 md:top-auto`}>
         {navList.map((item: NavLiistType, i: number) => (
           <Link
             to={item.path}
@@ -79,7 +86,13 @@ const Navbar = () => {
             {item.name}
           </Link>
         ))}
-      </div>}
+        <button
+          className="py-2 w-fit"
+          onClick={logout}
+        >
+          Logout
+        </button>
+      </div>
       <div className="flex items-center space-x-4">
         {isConnected ? (
           <button

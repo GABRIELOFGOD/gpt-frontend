@@ -7,7 +7,7 @@ const runInvestment = async (amount: number) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('user')}`
+        'Authorization': `Bearer ${JSON.parse(localStorage.getItem("user") as string)}`
       },
       body: JSON.stringify({ amount })
     });
