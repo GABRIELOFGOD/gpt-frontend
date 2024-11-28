@@ -30,7 +30,7 @@ const Login = ({setScreen}:{setScreen: Dispatch<SetStateAction<string>>}) => {
       <p className="text-4xl font-bold">Login</p>
       <p className='text-sm text-neutral-700'>Login to earn with GPTBOTS</p>
       <form
-        className='py-5 flex flex-col gap-5'
+        className='py-5 flex flex-col gap-5 formal'
         onSubmit={loginLoading ? undefined : handleLogin}
       >
         <input

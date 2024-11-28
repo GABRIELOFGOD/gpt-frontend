@@ -22,7 +22,7 @@ const route = createBrowserRouter([
         element: <Investment />
       },
       {
-        path: "withdrawals",
+        path: "records",
         element: <Withrawals />
       },
       {

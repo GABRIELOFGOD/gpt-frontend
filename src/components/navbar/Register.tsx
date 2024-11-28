@@ -1,6 +1,8 @@
-import { Dispatch, SetStateAction, useState } from "react"
+import { Dispatch, FormEvent, SetStateAction, useState } from "react"
 import useRegister from "../../hooks/RegisterHook";
 import toast from "react-hot-toast";
+import { useAccount, useConnect } from "wagmi";
+import { injected } from "wagmi/connectors";
 
 const Register = ({setScreen}:{setScreen: Dispatch<SetStateAction<string>>}) => {
   const [email, setEmail] = useState('');
@@ -9,7 +11,10 @@ const Register = ({setScreen}:{setScreen: Dispatch<SetStateAction<string>>}) => 
   const [phone, setPhone] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const { referralCode, register, isLoading: registerLoading, error: registerError, inputReferralCode } = useRegister();
+  const { isConnected, address } = useAccount();
+  const { connect } = useConnect();
+
+  const { referralCode, register, isLoading: registerLoading, error: registerError, inputReferralCode, checkWallet } = useRegister();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,7 +23,17 @@ const Register = ({setScreen}:{setScreen: Dispatch<SetStateAction<string>>}) => 
       toast.error('Passwords do not match');
       return;
     }
-    const registerResponse = await register({name, email, phone, password, referralCode});
+    toast.loading('connecting...');
+    const wallet = address as string;
+
+    const walletResponse = await checkWallet(wallet);
+    if(!walletResponse.message || walletResponse.message !== "Wallet address not found") {
+      toast.dismiss();
+      toast.error("The connected wallet is registered before, kindly login");
+      return;
+    }
+    
+    const registerResponse = await register({name, email, phone, password, wallet, referralCode});
     if(registerResponse && registerResponse.status === "fail") {
       toast.dismiss();
       toast.error(registerResponse.message);
@@ -33,14 +48,19 @@ const Register = ({setScreen}:{setScreen: Dispatch<SetStateAction<string>>}) => 
     toast.dismiss();
     toast.error(registerError);
   }
+
+  const connectWallet = (e: FormEvent) => {
+    e.preventDefault();
+    connect({ connector: injected() })
+  }
   
   return (
     <div className='w-full md:w-fit bg-white p-10 rounded-xl h-fit'>
       <p className="text-4xl font-bold">Register</p>
       <p className='text-sm text-neutral-700'>Register to earn with GPTBOTS</p>
       <form
-        className='py-5 flex flex-col gap-5'
-        onSubmit={registerLoading ? undefined : handleRegister}
+        className='py-5 flex flex-col gap-5 formal'
+        onSubmit={registerLoading ? undefined : isConnected ? handleRegister : connectWallet}
       >
         <input
           type="text"
@@ -92,7 +112,7 @@ const Register = ({setScreen}:{setScreen: Dispatch<SetStateAction<string>>}) => 
         </div>
         <button
           className='w-full h-12 bg-secondary text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed'
-          disabled={registerLoading}
+          disabled={registerLoading || !name || !phone || !email || !password || !confirmPassword}
         >
           {registerLoading ? 'Loading...' : 'Register'}
         </button>

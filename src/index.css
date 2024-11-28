@@ -13,3 +13,7 @@
 body{
   font-family: "Rubik", sans-serif;
 }
+
+.formal input {
+  @apply md:w-[300px];
+}

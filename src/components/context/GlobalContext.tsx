@@ -36,8 +36,8 @@ interface Props {
   children: ReactNode;
 }
 
-// export const BASEURL = "http://localhost:8000/api/v1";
-export const BASEURL = "https://api.gptbots.pro/api/v1";
+export const BASEURL = "http://localhost:8000/api/v1";
+// export const BASEURL = "https://api.gptbots.pro/api/v1";
 export const CreateGlobalContext = ({ children }: Props) => {
   const [userWallet, setUserWallet] = useState<string>("");
   const [withdrawalHistoryState, setWithdrawalHistory] = useState<Withdrawal[]>([]);
@@ -214,6 +214,24 @@ export const CreateGlobalContext = ({ children }: Props) => {
     
   }
 
+  // ================ INVESTMENT HISTORY ================ //
+  // const investmentHistory = async () => {
+  //   const request = await fetch(`${BASEURL}/user/investment/history`, {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       "Authorization": `Bearer ${JSON.parse(localStorage.getItem("user") as string)}`,
+  //     },
+  //   });
+  //   const response = await request.json();
+  //   console.log(response);
+  //   if(!request.ok) {
+  //     toast.error(response.message);
+  //   }
+  //   if(request.ok) {
+  //     // setEarningHistory(response?.history);
+  //   }
+  // }
 
 
   // ============================== ADMIN ============================== //

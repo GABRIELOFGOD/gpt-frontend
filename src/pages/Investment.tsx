@@ -28,7 +28,7 @@ const Investment = () => {
 
   const { isConnected } = useAccount();
 
-  const [isApproved, setIsApproved] = useState(false);
+  // const [isApproved, setIsApproved] = useState(false);
 
   // Get USDT balance
   const { data: usdtData } = useReadContract({
@@ -44,7 +44,7 @@ const Investment = () => {
     chainId: 97,
   })
 
-  const { isLoading: isConfirming } =
+  const { isLoading: isConfirming, data: confirmData } =
     useWaitForTransactionReceipt({
       hash,
     })
@@ -72,10 +72,12 @@ const Investment = () => {
     }
   }, [navigate, userWallet]);
 
-  const handleApprove = async () => {
+  const handleDeposit = () => {
     if (!selectedAmount) return;
 
-    try {
+    // toast.loading("Investment in progress...");
+
+    // =========== APRROVING CONTRACT ============== //
       writeContract({
         ...tokenAbi,
         address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517',
@@ -83,15 +85,93 @@ const Investment = () => {
         args: ['0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23', BigInt(selectedAmount * 1e18)],
       });
 
-      setIsApproved(true);
-      // await handleDeposit();
+      // =========== DEPOSITING CONTRACT ============== //
+      writeContract({
+        ...contractAbi,
+        address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23',
+        functionName: 'deposit',
+        args: [BigInt(selectedAmount * 1e18)],
+      });
+      // toast.dismiss();
+      // toast.success("Investment successful");
 
-    } catch (error) {
-      toast.error("Approval failed");
-      console.error("Approval failed:", error);
-      throw error;
-    }
-  };
+      if(!isPending && !isConfirming) {
+        console.log("let's check now")
+      }
+    
+  }
+
+  // const handleApprove = async () => {
+  //   if (!selectedAmount) return;
+
+  //   try {
+  //     writeContract({
+  //       ...tokenAbi,
+  //       address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517',
+  //       functionName: 'approve',
+  //       args: ['0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23', BigInt(selectedAmount * 1e18)],
+  //     });
+
+  //     setIsApproved(true);
+  //     // await handleDeposit();
+
+  //   } catch (error) {
+  //     toast.error("Approval failed");
+  //     console.error("Approval failed:", error);
+  //     throw error;
+  //   }
+  // };
+  // }
+
+  // const handleDeposit = () => {
+  //   if (!selectedAmount || !isApproved) return;
+  
+  //   try {
+  //     // Wait for the writeContract function to complete
+  //     writeContract({
+  //       ...contractAbi,
+  //       address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23',
+  //       functionName: 'deposit',
+  //       args: [BigInt(selectedAmount * 1e18)],
+  //     });
+    
+  //     // Clear state variables after successful transaction
+  //     setSelectedAmount(0);
+  //     setIsApproved(false);
+  //     setHasDeposited(true);
+  
+  //     // Link to backend for further investment handling
+      
+  //   } catch (error) {
+  //     toast.error("Deposit failed");
+  //     console.error("Deposit failed:", error);
+  //   }
+  // };
+
+  // const handleBackendCall = async () => {
+  //   const investmentResponse = await invest(selectedAmount);
+  //     console.log("Investment response:", investmentResponse);
+  
+  //     if (investmentResponse.status === "fail") {
+  //       return toast.error(investmentResponse.message);
+  //     } else {
+  //       toast.success(investmentResponse.message);
+  //       location.reload();
+  //     }
+  // };
+  // const [totalROI, setTotalROI] = useState<number>(0);
+  // const [totalReferral, setTotalReferral] = useState<number>(0);
+
+  // useEffect(() => {
+  //   userEarnings();
+  // },[])
+
+  // useEffect(() => {
+  //   if(earnings) {
+  //     setTotalROI(getCummulativeROI());
+  //     setTotalReferral(getCummulativeReferral());
+  //   }
+  // },[earnings])
 
   const { invest, error: investmentError, isLoading: isInvesting } = useInvestment();
   const { claimRef, claimRoi, isLoading: claimLoading, error: claimError } = useClaim()
@@ -106,56 +186,6 @@ const Investment = () => {
     console.log('Investment error:', investmentError);
     toast.error(investmentError);
   }
-
-  const handleDeposit = () => {
-    if (!selectedAmount || !isApproved) return;
-  
-    try {
-      // Wait for the writeContract function to complete
-      writeContract({
-        ...contractAbi,
-        address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23',
-        functionName: 'deposit',
-        args: [BigInt(selectedAmount * 1e18)],
-      });
-    
-      // Clear state variables after successful transaction
-      setSelectedAmount(0);
-      setIsApproved(false);
-      setHasDeposited(true);
-  
-      // Link to backend for further investment handling
-      
-    } catch (error) {
-      toast.error("Deposit failed");
-      console.error("Deposit failed:", error);
-    }
-  };
-
-  const handleBackendCall = async () => {
-    const investmentResponse = await invest(selectedAmount);
-      console.log("Investment response:", investmentResponse);
-  
-      if (investmentResponse.status === "fail") {
-        return toast.error(investmentResponse.message);
-      } else {
-        toast.success(investmentResponse.message);
-        location.reload();
-      }
-  };
-  // const [totalROI, setTotalROI] = useState<number>(0);
-  // const [totalReferral, setTotalReferral] = useState<number>(0);
-
-  // useEffect(() => {
-  //   userEarnings();
-  // },[])
-
-  // useEffect(() => {
-  //   if(earnings) {
-  //     setTotalROI(getCummulativeROI());
-  //     setTotalReferral(getCummulativeReferral());
-  //   }
-  // },[earnings])
 
   const claimRoiEarning = async () => {
     try {
@@ -185,14 +215,7 @@ const Investment = () => {
     } catch (error) {
       toast.error("Failed to claim Referral earnings");
     }
-  }
-
-  useEffect(() => {
-    if(isApproved && hasDeposited) {
-      handleBackendCall();
-    }
-  }, [hash, isApproved, hasDeposited]);
-  
+  }  
 
   const copyToClipBoard = () => {
     navigator.clipboard.writeText(`https://gptbots.pro?ref=${userProfileState?.referralCode}`);
@@ -269,12 +292,18 @@ const Investment = () => {
             </div>
           </div>
           { !isConnected ? <button className="w-full text-neutral-300 bg-lime-50 py-2 rounded-md">Connect wallet to invests</button>
-            : !isApproved ? <button
+          : <button
+            className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold ${(!selectedAmount || isPending || isConfirming || isInvesting) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onClick={handleDeposit}
+          >
+            {isPending || isConfirming || isInvesting ? "Investing..." : "Invest USDT"}
+          </button>}
+            {/* }: !isApproved ? <button
             onClick={handleApprove}
             disabled={!selectedAmount || isPending || isConfirming || isInvesting}
             className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold ${(!selectedAmount || isPending || isConfirming || isInvesting) ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {isPending || isConfirming || isInvesting ? "Approving..." : "Invest USDT"}
+            {isPending || isConfirming || isInvesting ? "Approving..." : "Approve Deposit"}
           </button> :
           <button
             onClick={handleDeposit}
@@ -283,7 +312,7 @@ const Investment = () => {
           >
             {isPending || isConfirming || isInvesting ? "Investing..." : "Invest USDT"}
           </button>
-          }
+          } */}
         </div>
       </div>
 
@@ -364,7 +393,7 @@ const Investment = () => {
             <p>{userProfileState?.referredUsers?.length +}</p>
           </div> */}
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
-            <p>Total Business</p>
+            <p>Total Team</p>
             <p>0</p>
           </div>
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
@@ -390,7 +419,7 @@ const Investment = () => {
           </div> */}
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Available to claim</p>
-            <p>{userProfileState?.claimableROI}</p>
+            <p>{userProfileState?.claimableROI} <span className="text-xs">USDT</span></p>
           </div>
           <button
             onClick={claimRoiEarning}
@@ -413,7 +442,7 @@ const Investment = () => {
           </div> */}
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Available to claim</p>
-            <p>{userProfileState?.claimableRef}</p>
+            <p>{userProfileState?.claimableRef} <span className="text-xs">USDT</span></p>
           </div>
           <button
             onClick={claimRefEarnings}

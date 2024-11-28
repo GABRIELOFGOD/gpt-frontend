@@ -33,6 +33,18 @@ const fetchRegister = async (data: RegisterData) => {
   return response;
 }
 
+const confirmWallet = async (wallet: string) => {
+  const request = await fetch(`${BASEURL}/user/wallet`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ wallet }),
+  });
+  const response = await request.json();
+  return response;
+}
+
 const useRegister = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,12 +72,26 @@ const useRegister = () => {
     }
   }, []);
 
+  const checkWallet = useCallback(async (wallet: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await confirmWallet(wallet);
+      setIsLoading(false);
+      return response;
+    } catch (err) {
+      setIsLoading(false);
+      setError("Wallet confirmation failed");
+      throw err;
+    }
+  }, []);
+
   const inputReferralCode = useCallback((code: string) => {
     setReferralCode(code);
   }
   , []);
 
-  return { register, isLoading, error, referralCode, inputReferralCode };
+  return { register, isLoading, error, referralCode, inputReferralCode, checkWallet };
 };
 
 export default useRegister;
