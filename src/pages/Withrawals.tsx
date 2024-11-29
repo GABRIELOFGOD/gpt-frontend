@@ -125,7 +125,7 @@ const Withrawals = () => {
           <p className="text-2xl font-semibold">Earning History(ROI)</p>
         </div>
         <div className="py-5 px-3">
-          {!earningHistoryState || earningHistoryState?.length <= 0 ?
+          {!earningHistoryState || earningHistoryState?.filter(withdrawal => withdrawal.generationLevel == 0)?.length <= 0 ?
             <div>
               <p className="text-light text-center py-3">Nothing earned yet</p>
             </div> : 
@@ -144,7 +144,7 @@ const Withrawals = () => {
                 </tr>
               </thead>
                 <tbody className="bg-white divide-y divide-secondary">
-                {earningHistoryState?.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((withdrawal, index) => (
+                {earningHistoryState?.filter(withdrawal => withdrawal.generationLevel == 0)?.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((withdrawal, index) => (
                   <tr key={index}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
                     {withdrawal.amountEarned}
@@ -189,7 +189,7 @@ const Withrawals = () => {
           <p className="text-2xl font-semibold">Earning History(Affliate)</p>
         </div>
         <div className="py-5 px-3">
-          {!earningHistoryState || earningHistoryState?.length <= 0 ?
+          {!earningHistoryState || earningHistoryState?.filter(withdrawal => withdrawal.generationLevel > 0)?.length <= 0 ?
             <div>
               <p className="text-light text-center py-3">Nothing earned yet</p>
             </div> : 
@@ -208,16 +208,16 @@ const Withrawals = () => {
                 </tr>
               </thead>
                 <tbody className="bg-white divide-y divide-secondary">
-                {earningHistoryState?.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((withdrawal, index) => (
+                {earningHistoryState?.filter(withdrawal => withdrawal.generationLevel > 0).slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage).map((withdrawal, index) => (
                   <tr key={index}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
-                    {withdrawal.amountEarned}
+                  {withdrawal.amountEarned}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
-                    {withdrawal.generationLevel == 0 ? "ROI" : `Level ${withdrawal.generationLevel}`}
+                  {`Level ${withdrawal.generationLevel}`}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
-                    {dateFormatter(withdrawal.date)}
+                  {dateFormatter(withdrawal.date)}
                   </td>
                   </tr>
                 ))}

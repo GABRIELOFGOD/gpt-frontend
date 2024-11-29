@@ -15,7 +15,7 @@ const WithrawalModal = ({ close }: {close: () => void}) => {
 
   const withdraw = () => {
     setProcessing(true);
-    userWithdrawal(parseInt(userProfileState?.balance || "0"));
+    userWithdrawal(parseFloat(userProfileState?.balance || "0"));
     setProcessing(false);
     close();
   }

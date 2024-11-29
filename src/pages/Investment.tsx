@@ -10,6 +10,10 @@ import WithrawalModal from "../components/WithrawalModal";
 import useInvestment from "../hooks/InvestmentHook";
 // import useEarning from "../hooks/userHook";
 import useClaim from "../hooks/ClaimHook";
+import DoughnutChart from "../components/charts/Doughtnut";
+import useEarning from "../hooks/userHook";
+import { EarningHistory } from "../utils/data";
+import useRegister from "../hooks/RegisterHook";
 
 const availableSub: number[] = [
   100, 300, 500, 1000, 3000, 5000, 10000, 25000, 50000, 100000
@@ -24,9 +28,12 @@ const Investment = () => {
   const [bnbBalance, setbnbBalance] = useState<string>("0");
   const [confirmWithdraw, setConfirmWithdraw] = useState<boolean>(false);
 
-  const [hasDeposited, setHasDeposited] = useState<boolean>(false);
 
-  const { isConnected } = useAccount();
+  const { invest, error: investmentError, isLoading: isInvesting } = useInvestment();
+  const { claimRef, claimRoi, isLoading: claimLoading, error: claimError } = useClaim()
+  // const [hasDeposited, setHasDeposited] = useState<boolean>(false);
+
+  const { isConnected, address } = useAccount();
 
   // const [isApproved, setIsApproved] = useState(false);
 
@@ -44,7 +51,7 @@ const Investment = () => {
     chainId: 97,
   })
 
-  const { isLoading: isConfirming, data: confirmData } =
+  const { isLoading: isConfirming } =
     useWaitForTransactionReceipt({
       hash,
     })
@@ -72,13 +79,26 @@ const Investment = () => {
     }
   }, [navigate, userWallet]);
 
-  const handleDeposit = () => {
+  const { checkWallet } = useRegister();
+
+  const handleDeposit = async () => {
     if (!selectedAmount) return;
 
     // toast.loading("Investment in progress...");
+    // TODO: Check if user has approved contract
+    // TODO: ensure it registered wallet that wants to deposit
+
+    const wallet = address as string;
+
+    const walletResponse = await checkWallet(wallet);
+    if (!walletResponse.user || walletResponse.user.wallet !== wallet) {
+      toast.dismiss();
+      toast.error("The connected wallet is not registered, kindly register");
+      return;
+    }
 
     // =========== APRROVING CONTRACT ============== //
-      writeContract({
+      await writeContract({
         ...tokenAbi,
         address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517',
         functionName: 'approve',
@@ -86,7 +106,7 @@ const Investment = () => {
       });
 
       // =========== DEPOSITING CONTRACT ============== //
-      writeContract({
+      await writeContract({
         ...contractAbi,
         address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23',
         functionName: 'deposit',
@@ -98,84 +118,59 @@ const Investment = () => {
       if(!isPending && !isConfirming) {
         console.log("let's check now")
       }
+
+      const investmentResponse = await invest(selectedAmount, wallet);
+      console.log("Investment response:", investmentResponse);
+      if (investmentResponse.status && investmentResponse.status === "fail") {
+        return toast.error(investmentResponse.message);
+      } else {
+        toast.success(investmentResponse.message);
+        location.reload();
+      }
     
   }
 
-  // const handleApprove = async () => {
-  //   if (!selectedAmount) return;
+  const { userEarnings } = useEarning();
+  const [allEarnings, setAllEarnings] = useState<EarningHistory[]>([]);
+  const [totalROI, setTotalROI] = useState<number>(0);
+  const [totalReferral, setTotalReferral] = useState<number>(0);
 
-  //   try {
-  //     writeContract({
-  //       ...tokenAbi,
-  //       address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517',
-  //       functionName: 'approve',
-  //       args: ['0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23', BigInt(selectedAmount * 1e18)],
-  //     });
-
-  //     setIsApproved(true);
-  //     // await handleDeposit();
-
-  //   } catch (error) {
-  //     toast.error("Approval failed");
-  //     console.error("Approval failed:", error);
-  //     throw error;
-  //   }
-  // };
-  // }
-
-  // const handleDeposit = () => {
-  //   if (!selectedAmount || !isApproved) return;
+  const fetchEarnings = async () => {
+    try {
+      const response = await userEarnings();
   
-  //   try {
-  //     // Wait for the writeContract function to complete
-  //     writeContract({
-  //       ...contractAbi,
-  //       address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23',
-  //       functionName: 'deposit',
-  //       args: [BigInt(selectedAmount * 1e18)],
-  //     });
-    
-  //     // Clear state variables after successful transaction
-  //     setSelectedAmount(0);
-  //     setIsApproved(false);
-  //     setHasDeposited(true);
+      // Filter earnings into ROI and referral
+      const roi = response.filter(
+        (earning: EarningHistory) => earning.generationLevel === 0
+      );
+      const ref = response.filter(
+        (earning: EarningHistory) => earning.generationLevel > 0
+      );
   
-  //     // Link to backend for further investment handling
-      
-  //   } catch (error) {
-  //     toast.error("Deposit failed");
-  //     console.error("Deposit failed:", error);
-  //   }
-  // };
-
-  // const handleBackendCall = async () => {
-  //   const investmentResponse = await invest(selectedAmount);
-  //     console.log("Investment response:", investmentResponse);
+      // Calculate totals, using parseFloat to correctly handle decimal values
+      const totalRoiAmount = roi.reduce(
+        (total: number, earning: EarningHistory) => total + parseFloat(earning.amountEarned || "0"),
+        0
+      );
+      const totalReferralAmount = ref.reduce(
+        (total: number, earning: EarningHistory) => total + parseFloat(earning.amountEarned || "0"),
+        0
+      );
   
-  //     if (investmentResponse.status === "fail") {
-  //       return toast.error(investmentResponse.message);
-  //     } else {
-  //       toast.success(investmentResponse.message);
-  //       location.reload();
-  //     }
-  // };
-  // const [totalROI, setTotalROI] = useState<number>(0);
-  // const [totalReferral, setTotalReferral] = useState<number>(0);
-
-  // useEffect(() => {
-  //   userEarnings();
-  // },[])
-
-  // useEffect(() => {
-  //   if(earnings) {
-  //     setTotalROI(getCummulativeROI());
-  //     setTotalReferral(getCummulativeReferral());
-  //   }
-  // },[earnings])
-
-  const { invest, error: investmentError, isLoading: isInvesting } = useInvestment();
-  const { claimRef, claimRoi, isLoading: claimLoading, error: claimError } = useClaim()
-  // const { userEarnings, getCummulativeROI, getCummulativeReferral, earnings } = useEarning();
+      // Update state
+      setTotalROI(totalRoiAmount);
+      setTotalReferral(totalReferralAmount);
+      setAllEarnings(response);
+    } catch (error) {
+      console.error("Failed to fetch earnings:", error);
+      // Optionally, show error feedback in the UI
+    }
+  };
+  
+  useEffect(() => {
+    fetchEarnings();
+  }, []);
+  
 
   if(claimError) {
     console.log('Claim error:', claimError);
@@ -218,7 +213,7 @@ const Investment = () => {
   }  
 
   const copyToClipBoard = () => {
-    navigator.clipboard.writeText(`https://gptbots.pro?ref=${userProfileState?.referralCode}`);
+    navigator.clipboard.writeText(`https://app.gptbots.pro/investment?ref=${userProfileState?.referralCode}`);
     toast.success("Referral link copied to clipboard");
   }
 
@@ -229,6 +224,10 @@ const Investment = () => {
   const toTwoDecimalPlaces = (num: number): string => {
     return num.toFixed(2);
   };
+
+  const totalEarningToPercentage = (total: number, earning: number): number => {
+    return (earning / total) * 100;
+  }
   
   return (
     <div className="px-3 md:px-52 flex flex-col gap-10 py-10 md:py-20">
@@ -278,7 +277,7 @@ const Investment = () => {
             </select>
           </div>
           <div className="py-10 flex flex-col gap-3">
-            <div className="flex justify-between font-semibold text-lg">
+            {/* <div className="flex justify-between font-semibold text-lg">
               <p>USDT Balance:</p>
               <p>{usdtBalance}</p>
             </div>
@@ -289,7 +288,37 @@ const Investment = () => {
             <div className="flex justify-between font-semibold text-lg">
               <p>Total USDT Invested:</p>
               <p>{userProfileState?.investments.reduce((total, investment) => total + investment.amount, 0)}</p>
+            </div> */}
+
+            <div className="flex justify-between font-semibold text-lg">
+              <div className="my-auto flex flex-col gap-2">
+                <div>
+                  <p>Total USDT Invested:</p>
+                  <p className="text-sm text-secondary ">{userProfileState?.investments.reduce((total, investment) => total + investment.amount, 0)}</p>
+                </div>
+                <div>
+                  <p>Total ROI</p>
+                  <p className="text-sm text-secondary ">{totalROI.toFixed(4)}</p>
+                
+                </div>
+                <div>
+                  <p>Ceiling limit (3x)</p>
+                  <p className="text-sm text-secondary ">{userProfileState?.investments && userProfileState?.investments.reduce((total, investment) => total + investment.amount, 0) * 3}</p>
+                </div>
+              </div>
+
+              <div className="h-[100px]">
+                <DoughnutChart
+                  color="blue"
+                  percentage={totalEarningToPercentage(userProfileState?.investments.reduce((total, investment) => total + investment.amount, 0)! * 3, totalROI)}
+                  // total={totalEarningToPercentage(totalROI)}
+                  completeLabel="Total ROI"
+                  remainingLabel="Ceiling limit"
+                />
+              </div>
+              
             </div>
+            
           </div>
           { !isConnected ? <button className="w-full text-neutral-300 bg-lime-50 py-2 rounded-md">Connect wallet to invests</button>
           : <button
@@ -413,10 +442,10 @@ const Investment = () => {
           <p className="text-2xl my-auto font-semibold">Earning claims</p>
         </div>
         <div className="px-3 py-10 bg-white flex flex-col gap-3">
-          {/* <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
+          <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Total ROI Earned</p>
-            <p>{totalROI}</p>
-          </div> */}
+            <p>{totalROI.toFixed(4)} <span className="text-xs">USDT</span></p>
+          </div>
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Available to claim</p>
             <p>{userProfileState?.claimableROI} <span className="text-xs">USDT</span></p>
@@ -436,10 +465,10 @@ const Investment = () => {
           <p className="text-2xl my-auto font-semibold">Affliate Earning</p>
         </div>
         <div className="px-3 py-10 flex bg-white flex-col gap-3">
-          {/* <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
+          <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Total Affliate Earn</p>
-            <p>{totalReferral}</p>
-          </div> */}
+            <p>{totalReferral.toFixed(4)} <span className="text-xs">USDT</span></p>
+          </div>
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Available to claim</p>
             <p>{userProfileState?.claimableRef} <span className="text-xs">USDT</span></p>

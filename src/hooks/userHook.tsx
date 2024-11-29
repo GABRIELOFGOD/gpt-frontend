@@ -11,8 +11,8 @@ const getUserEarnings = async () => {
     },
   });
   const response = await request.json();
-  console.log(response);
-  return response;
+  console.log(response.history);
+  return response.history;
 }
 
 const swapCall = async (data: SwapData) => {
@@ -65,13 +65,13 @@ const useEarning = () => {
   const getCummulativeROI = (): number => {
     return earnings
       .filter(earning => earning.generationLevel === 0)
-      .reduce((total, earning) => total + parseInt(earning.amountEarned), 0);
+      .reduce((total, earning) => total + parseFloat(earning.amountEarned), 0);
   }
 
   const getCummulativeReferral = (): number => {
     return earnings
       .filter(earning => earning.generationLevel > 0)
-      .reduce((total, earning) => total + parseInt(earning.amountEarned), 0);
+      .reduce((total, earning) => total + parseFloat(earning.amountEarned), 0);
   }
 
   return { userEarnings, isLoading, error, earnings, getCummulativeROI, getCummulativeReferral, userSwaps };

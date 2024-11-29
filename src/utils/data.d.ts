@@ -75,3 +75,12 @@ export interface SwapData {
 //   "generationLevel": 0,
 //   "date": "2024-10-31T21:30:48.067Z"
 // },
+
+// =============== CHART ===================== //
+export interface DoughtnutChartProps {
+  color: "red" | "green" | "blue";
+  percentage: number;
+  // total: number;
+  completeLabel: string;
+  remainingLabel: string;
+}
