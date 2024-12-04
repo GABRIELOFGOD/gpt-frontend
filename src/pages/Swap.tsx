@@ -30,7 +30,7 @@ const Swap = () => {
   const { userSwaps, isLoading, error } = useEarning();
 
   if (error) {
-    console.log(error);
+     (error);
     toast.error(error);
   }
 
@@ -74,7 +74,7 @@ const Swap = () => {
 
     try {
       const swapResponse = await userSwaps(data);
-      console.log(swapResponse);
+       (swapResponse);
       if (swapResponse.status && swapResponse.status === "fail") {
         toast.error(swapResponse.message);
         return;
@@ -86,7 +86,7 @@ const Swap = () => {
       setFromToken(TOKENS[0]);
       setToToken(TOKENS[1]);
     } catch (err) {
-      console.log(err);
+       (err);
       toast.error("Swap failed");
     }
   };
@@ -303,7 +303,7 @@ export default Swap;
 //   const { userSwaps, isLoading, error } = useEarning();
 
 //   if (error) {
-//     console.log(error);
+//      (error);
 //     toast.error(error);
 //   }
 
@@ -357,7 +357,7 @@ export default Swap;
 //       setFromToken(TOKENS[0]);
 //       setToToken(TOKENS[1]);
 //     } catch (err) {
-//       console.log(err);
+//        (err);
 //       toast.error("Swap failed");
 //     }
 //   };

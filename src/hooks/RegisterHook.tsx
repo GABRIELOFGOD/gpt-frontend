@@ -21,7 +21,7 @@ import { BASEURL } from "../components/context/GlobalContext";
 // }
 
 const fetchRegister = async (data: RegisterData) => {
-  console.log("data", data);
+   ("data", data);
   const request = await fetch(`${BASEURL}/user/register`, {
     method: "POST",
     headers: {
@@ -42,7 +42,7 @@ const confirmWallet = async (wallet: string) => {
     body: JSON.stringify({ wallet }),
   });
   const response = await request.json();
-  if(!response.ok) {
+  if(!request.ok) {
     throw new Error('Failed to confirm wallet');
   }
   return response;

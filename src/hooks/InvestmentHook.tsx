@@ -12,7 +12,7 @@ const runInvestment = async (amount: number, wallet: string) => {
       body: JSON.stringify({ amount, wallet }),
     });
     const res = await response.json();
-    console.log("response fromhook", res);
+     ("response fromhook", res);
     if (!response.ok) {
       throw new Error('Failed to invest');
     }

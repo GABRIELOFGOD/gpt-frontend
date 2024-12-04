@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAccount, useBalance, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { contractAbi } from "../../abi";
 import { useGlobalContext } from "../components/context/GlobalContext";
 
@@ -24,8 +24,8 @@ const Investment = () => {
   const navigate = useNavigate();
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
   const { data: hash, writeContract, isPending, error } = useWriteContract()
-  const [usdtBalance, setUsdtBalance] = useState<string>("0");
-  const [bnbBalance, setbnbBalance] = useState<string>("0");
+  // const [usdtBalance, setUsdtBalance] = useState<string>("0");
+  // const [bnbBalance, setbnbBalance] = useState<string>("0");
   const [confirmWithdraw, setConfirmWithdraw] = useState<boolean>(false);
 
 
@@ -38,38 +38,38 @@ const Investment = () => {
   // const [isApproved, setIsApproved] = useState(false);
 
   // Get USDT balance
-  const { data: usdtData } = useReadContract({
-    ...tokenAbi,
-    address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517', // USDT contract address
-    functionName: 'balanceOf',
-    args: [userWallet as `0x${string}`],
-  });
+  // const { data: usdtData } = useReadContract({
+  //   ...tokenAbi,
+  //   address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517', // USDT contract address
+  //   functionName: 'balanceOf',
+  //   args: [userWallet as `0x${string}`],
+  // });
 
   // Get BNB balance
-  const { data: bnbData } = useBalance({
-    address: userWallet as `0x${string}`,
-    chainId: 97,
-  })
+  // const { data: bnbData } = useBalance({
+  //   address: userWallet as `0x${string}`,
+  //   chainId: 97,
+  // })
 
   const { isLoading: isConfirming } =
     useWaitForTransactionReceipt({
-      hash,
-    })
-  useEffect(() => {
-    // {userProfileState && console.log(userProfileState)}
-    if (bnbData) {
-      setbnbBalance(Number(bnbData.formatted).toFixed(2));
-    }
+    hash,
+  })
+  // useEffect(() => {
+  //   // {userProfileState &&  (userProfileState)}
+  //   if (bnbData) {
+  //     setbnbBalance(Number(bnbData.formatted).toFixed(2));
+  //   }
 
-    if (usdtData) {
-      setUsdtBalance((Number(usdtData) / 1e18).toFixed(2));
-    }
-  }, [usdtData, bnbData]);
+  //   if (usdtData) {
+  //     setUsdtBalance((Number(usdtData) / 1e18).toFixed(2));
+  //   }
+  // }, [usdtData, bnbData]);
 
 
   useEffect(() => {
     if (error) {
-      console.log('Transaction error:', error);
+       ('Transaction error:', error);
     }
   }, [error]);
 
@@ -116,11 +116,11 @@ const Investment = () => {
       // toast.success("Investment successful");
 
       if(!isPending && !isConfirming) {
-        console.log("let's check now")
+         ("let's check now")
       }
 
       const investmentResponse = await invest(selectedAmount, wallet);
-      console.log("Investment response:", investmentResponse);
+       ("Investment response:", investmentResponse);
       if (investmentResponse.status && investmentResponse.status === "fail") {
         return toast.error(investmentResponse.message);
       } else {
@@ -131,7 +131,7 @@ const Investment = () => {
   }
 
   const { userEarnings } = useEarning();
-  const [allEarnings, setAllEarnings] = useState<EarningHistory[]>([]);
+  // const [allEarnings, setAllEarnings] = useState<EarningHistory[]>([]);
   const [totalROI, setTotalROI] = useState<number>(0);
   const [totalReferral, setTotalReferral] = useState<number>(0);
 
@@ -160,7 +160,7 @@ const Investment = () => {
       // Update state
       setTotalROI(totalRoiAmount);
       setTotalReferral(totalReferralAmount);
-      setAllEarnings(response);
+      // setAllEarnings(response);
     } catch (error) {
       console.error("Failed to fetch earnings:", error);
       // Optionally, show error feedback in the UI
@@ -173,19 +173,19 @@ const Investment = () => {
   
 
   if(claimError) {
-    console.log('Claim error:', claimError);
+     ('Claim error:', claimError);
     toast.error(claimError);
   }
 
   if (investmentError) {
-    console.log('Investment error:', investmentError);
+     ('Investment error:', investmentError);
     toast.error(investmentError);
   }
 
   const claimRoiEarning = async () => {
     try {
       const roiRes = await claimRoi();
-      console.log(roiRes);
+       (roiRes);
       if(roiRes.status && roiRes.status === "fail") {
         toast.error(roiRes.message);
       } else {
@@ -200,7 +200,7 @@ const Investment = () => {
   const claimRefEarnings = async () => {
     try {
       const refRes = await claimRef();
-      console.log(refRes);
+       (refRes);
       if(refRes.status && refRes.status === "fail") {
         toast.error(refRes.message);
       } else {

@@ -84,3 +84,12 @@ export interface DoughtnutChartProps {
   completeLabel: string;
   remainingLabel: string;
 }
+
+export interface Downlines {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  level: number;
+  investment: number;
+}

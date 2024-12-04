@@ -17,11 +17,11 @@ const Login = ({setScreen}:{setScreen: Dispatch<SetStateAction<string>>}) => {
       localStorage.setItem("user", JSON.stringify(loginResponse.token));
       window.location.reload();
     }
-    console.log(loginResponse);
+     (loginResponse);
   }
 
   if(loginError) {
-    console.log(loginError);
+     (loginError);
     toast.error(loginError);
   }
   

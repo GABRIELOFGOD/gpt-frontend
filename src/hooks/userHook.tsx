@@ -11,7 +11,7 @@ const getUserEarnings = async () => {
     },
   });
   const response = await request.json();
-  console.log(response.history);
+   (response.history);
   return response.history;
 }
 

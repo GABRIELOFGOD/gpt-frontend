@@ -46,25 +46,25 @@ const Withrawals = () => {
     <div className="px-3 md:px-52 flex flex-col gap-10 py-10 md:py-20">
     <div className="flex gap-1">
       <button
-        className={`flex justify-center w-1/2 rounded-md py-2 items-center text-white text-lg font-semibold ${tab == "withdrawal" ? "bg-secondary" : "bg-primary"}`}
+        className={`flex justify-center w-1/2 rounded-md py-2 items-center text-white text-xs md:text-lg font-semibold ${tab == "withdrawal" ? "bg-secondary" : "bg-primary"}`}
         onClick={() => setTab("withdrawal")}
       >
         Withdrawal History
       </button>
       <button
-        className={`flex justify-center w-1/2 rounded-md py-2 items-center text-white text-lg font-semibold ${tab == "earningRoi" ? "bg-secondary" : "bg-primary"}`}
+        className={`flex justify-center w-1/2 rounded-md py-2 items-center text-white text-xs md:text-lg font-semibold ${tab == "earningRoi" ? "bg-secondary" : "bg-primary"}`}
         onClick={() => setTab("earningRoi")}
       >
         Earning History (ROI)
       </button>
       <button
-        className={`flex justify-center w-1/2 rounded-md py-2 items-center text-white text-lg font-semibold ${tab == "earningAff" ? "bg-secondary" : "bg-primary"}`}
+        className={`flex justify-center w-1/2 rounded-md py-2 items-center text-white text-xs md:text-lg font-semibold ${tab == "earningAff" ? "bg-secondary" : "bg-primary"}`}
         onClick={() => setTab("earningAff")}
       >
         Earning History (Affliate)
       </button>
       <button
-        className={`flex justify-center w-1/2 rounded-md py-2 items-center text-white text-lg font-semibold ${tab == "investment" ? "bg-secondary" : "bg-primary"}`}
+        className={`flex justify-center w-1/2 rounded-md py-2 items-center text-white text-xs md:text-lg font-semibold ${tab == "investment" ? "bg-secondary" : "bg-primary"}`}
         onClick={() => setTab("investment")}
       >
         Investment History

@@ -51,7 +51,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
   const { disconnect } = useDisconnect();
 
   const userInvestment = async (amount: number) => {
-    console.log(localStorage.getItem("user"));
+     (localStorage.getItem("user"));
     const request = await fetch(`${BASEURL}/investment/invest`, {
       method: "POST",
       headers: {
@@ -61,7 +61,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
       body: JSON.stringify({ amount }),
     });
     const response = await request.json();
-    // console.log(response);
+    //  (response);
     if(!request.ok) {
       toast.error(response.message);
     }
@@ -79,7 +79,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
       body: ref ? JSON.stringify({ wallet, ref }) : JSON.stringify({ wallet }),
     });
     const response = await request.json();
-    // console.log(response);
+    //  (response);
     if(request.ok) {
       localStorage.setItem("user", JSON.stringify(response.token));
       return true;
@@ -96,7 +96,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
       },  
     });
     const response = await request.json();
-    console.log(response);
+     (response);
     if(!request.ok) {
       toast.error(response.message);
     }
@@ -116,7 +116,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
       },
     });
     const response = await request.json();
-    console.log(response);
+     (response);
     if(!request.ok) {
       disconnect();
       setAuthenticated(false);
@@ -143,7 +143,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
       },
     });
     const response = await request.json();
-    console.log(response);
+     (response);
     if(!request.ok) {
       toast.error(response.message);
     }
@@ -164,7 +164,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
       body: JSON.stringify({ amount }),
     });
     const response = await request.json();
-    console.log(response);
+     (response);
     if(!request.ok) {
       toast.error(response.message);
     }
@@ -183,7 +183,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
       },
     });
     const response = await request.json();
-    console.log(response);
+     (response);
     if(!request.ok) {
       toast.error(response.message);
     }
@@ -204,7 +204,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
       },
     });
     const response = await request.json();
-    console.log(response);
+     (response);
     if(!request.ok) {
       toast.error(response.message);
     }
@@ -224,7 +224,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
   //     },
   //   });
   //   const response = await request.json();
-  //   console.log(response);
+  //    (response);
   //   if(!request.ok) {
   //     toast.error(response.message);
   //   }
@@ -265,7 +265,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
       },
     });
     const response = await request.json();
-    console.log("All withdrawals", response);
+     ("All withdrawals", response);
     if(!request.ok) {
       toast.error(response.message);
     }
@@ -285,7 +285,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
       body: JSON.stringify({ withdrawalId: id }),
     });
     const response = await request.json();
-    console.log(response);
+     (response);
     if(!request.ok) {
       toast.error(response.message);
     }

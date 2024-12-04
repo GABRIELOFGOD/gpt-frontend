@@ -31,7 +31,7 @@ const Navbar = () => {
   //   const handleSignMessage = async () => {
   //     if (isConnected) {
   //       const message = "Please sign this message to verify your wallet ownership.";
-  //       console.log("Query params", ref);
+  //        ("Query params", ref);
   //       try {
   //         toast.loading(message);
   

@@ -44,7 +44,7 @@ const Register = ({setScreen}:{setScreen: Dispatch<SetStateAction<string>>}) => 
   }
 
   if(registerError) {
-    console.log(registerError);
+     (registerError);
     toast.dismiss();
     toast.error(registerError);
   }
