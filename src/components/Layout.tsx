@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "./navbar/Navbar";
 import Loading from "./Loading";
 import { useEffect } from "react";
@@ -21,12 +21,15 @@ const Layout = () => {
     setLoading(false);
   },[])
 
+  const location = useLocation();
+
+  const excempted = ["/dashboard/users", "/dashboard", "/dashboard/requests", "/dashboard/withrawal-report", "/dashboard/investments", "/dashboard/support"]
   
   return (
     <div>
       { loading ? <Loading /> : !authenticated ? <LoginModal /> :
         <div>
-          <Navbar />
+          {!excempted.includes(location.pathname) && <Navbar />}
           <Outlet />
         </div>
       }

@@ -265,7 +265,6 @@ export const CreateGlobalContext = ({ children }: Props) => {
       },
     });
     const response = await request.json();
-     ("All withdrawals", response);
     if(!request.ok) {
       toast.error(response.message);
     }

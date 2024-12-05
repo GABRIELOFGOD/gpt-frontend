@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { useGlobalContext } from "../components/context/GlobalContext";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { Outlet, useNavigate } from "react-router-dom";
+import Sidebar from "../components/dashboard/Sidebar";
+import Header from "../components/dashboard/Header";
 
 const Admin = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [approvalLoading, setApprovalLoading] = useState(false);
   // const [confirmWithdrawal, setConfirmWithdrawal] = useState(false);
+  const navigate = useNavigate();
 
   // const closeModal = () => {
   //   setConfirmWithdrawal(!confirmWithdrawal);
@@ -13,11 +17,15 @@ const Admin = () => {
   
   const itemsPerPage = 10;
 
-  const { allUsersState, allUsers, withdrawalsForAdmin, withdrawalsState, approveWithdrawal } = useGlobalContext();
+  const { allUsersState, allUsers, withdrawalsForAdmin, withdrawalsState, approveWithdrawal, userProfileState } = useGlobalContext();
   
   useEffect(() => {
-    allUsers();
-    withdrawalsForAdmin();
+    if(userProfileState && userProfileState.role == "admin"){
+      allUsers();
+      withdrawalsForAdmin();
+    } else {
+      navigate(-1);
+    }
   }, []);
   
   const handleNextPage = () => {
@@ -49,7 +57,21 @@ const Admin = () => {
   }
 
   return (
-    <div className="px-3 py-5">
+    <div className="flex bg-neutral-100 w-full h-screen">
+      <Sidebar />
+      <div className="w-full p-3 flex flex-col gap-5">
+        <Header />
+        <div className="h-full overflow-y-auto">
+          <Outlet />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default Admin
+
+{/* <div className="px-3 py-5">
       <p className="text-2xl font-bold pb-5">Welcome Admin</p>
       <div className="border-secondary rounded-md border mb-5">
         <div className="bg-secondary text-white px-10 w-full py-3">
@@ -69,9 +91,9 @@ const Admin = () => {
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     amount
                   </th>
-                  {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Date
-                  </th> */}
+                  </th>
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                     Action
                   </th>
@@ -86,9 +108,9 @@ const Admin = () => {
                     <td className="px-6 py-4 text-[10px] semi-bold whitespace-nowrap text-secondary">
                       {withdrawal.amount}
                     </td>
-                    {/* <td className="px-6 py-4 text-[10px] semi-bold whitespace-nowrap text-sm text-secondary">
+                    <td className="px-6 py-4 text-[10px] semi-bold whitespace-nowrap text-sm text-secondary">
                       {dateFormatter(withdrawal.createdAt)}
-                    </td> */}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary">
                       {withdrawal.status == "processing" ? <div>
                         {
@@ -106,12 +128,12 @@ const Admin = () => {
                 </tbody>
             </table>
           }
-          {/* <button
+          <button
             className={`flex justify-center w-full rounded-md bg-secondary py-2 text-white text-lg font-semibold`}
             onClick={closeModal}
           >
             Withdraw
-          </button> */}
+          </button>
         </div>
         <div className="flex gap-2 justify-end px-3 py-2">
           <button
@@ -164,12 +186,12 @@ const Admin = () => {
                 </tbody>
             </table>
           }
-          {/* <button
+          <button
             className={`flex justify-center w-full rounded-md bg-secondary py-2 text-white text-lg font-semibold`}
             onClick={closeModal}
           >
             Withdraw
-          </button> */}
+          </button>
         </div>
         <div className="flex gap-2 justify-end px-3 py-2">
           <button
@@ -188,8 +210,4 @@ const Admin = () => {
           </button>
         </div>
       </div>
-    </div>
-  )
-}
-
-export default Admin
+    </div> */}

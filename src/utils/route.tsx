@@ -7,6 +7,12 @@ import Investment from '../pages/Investment';
 import Admin from '../pages/Admin';
 import Swap from '../pages/Swap';
 import Game from '../pages/Game';
+import Dashboard from '../pages/dashboard/Dashboard';
+import User from '../pages/dashboard/User';
+import Withdrawal from '../pages/dashboard/Withdrawal';
+import WithdrawalReport from '../pages/dashboard/WithdrawalReport';
+import Investments from '../pages/dashboard/Investments';
+import Support from '../pages/dashboard/Support';
 
 const route = createBrowserRouter([
   {
@@ -30,8 +36,34 @@ const route = createBrowserRouter([
         element: <ReferralHistory />
       },
       {
-        path: "admin",
-        element: <Admin />
+        path: "dashboard",
+        element: <Admin />,
+        children: [
+          {
+            path: "",
+            element: <Dashboard />
+          },
+          {
+            path: "users",
+            element: <User />
+          },
+          {
+            path: "requests",
+            element: <Withdrawal />
+          },
+          {
+            path: "withrawal-report",
+            element: <WithdrawalReport />
+          },
+          {
+            path: "investments",
+            element: <Investments />
+          },
+          {
+            path: "support",
+            element: <Support />
+          }
+        ]
       },
       {
         path: "swap",

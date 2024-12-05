@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAccount, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { useAccount, useBalance, useReadContract, useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { contractAbi } from "../../abi";
 import { useGlobalContext } from "../components/context/GlobalContext";
 
@@ -24,8 +24,8 @@ const Investment = () => {
   const navigate = useNavigate();
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
   const { data: hash, writeContract, isPending, error } = useWriteContract()
-  // const [usdtBalance, setUsdtBalance] = useState<string>("0");
-  // const [bnbBalance, setbnbBalance] = useState<string>("0");
+  const [usdtBalance, setUsdtBalance] = useState<string>("0");
+  const [bnbBalance, setbnbBalance] = useState<string>("0");
   const [confirmWithdraw, setConfirmWithdraw] = useState<boolean>(false);
 
 
@@ -38,38 +38,38 @@ const Investment = () => {
   // const [isApproved, setIsApproved] = useState(false);
 
   // Get USDT balance
-  // const { data: usdtData } = useReadContract({
-  //   ...tokenAbi,
-  //   address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517', // USDT contract address
-  //   functionName: 'balanceOf',
-  //   args: [userWallet as `0x${string}`],
-  // });
+  const { data: usdtData } = useReadContract({
+    ...tokenAbi,
+    address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517', // USDT contract address
+    functionName: 'balanceOf',
+    args: [userWallet as `0x${string}`],
+  });
 
   // Get BNB balance
-  // const { data: bnbData } = useBalance({
-  //   address: userWallet as `0x${string}`,
-  //   chainId: 97,
-  // })
+  const { data: bnbData } = useBalance({
+    address: userWallet as `0x${string}`,
+    chainId: 97,
+  })
 
   const { isLoading: isConfirming } =
     useWaitForTransactionReceipt({
     hash,
   })
-  // useEffect(() => {
-  //   // {userProfileState &&  (userProfileState)}
-  //   if (bnbData) {
-  //     setbnbBalance(Number(bnbData.formatted).toFixed(2));
-  //   }
+  useEffect(() => {
+    // {userProfileState &&  (userProfileState)}
+    if (bnbData) {
+      setbnbBalance(Number(bnbData.formatted).toFixed(2));
+    }
 
-  //   if (usdtData) {
-  //     setUsdtBalance((Number(usdtData) / 1e18).toFixed(2));
-  //   }
-  // }, [usdtData, bnbData]);
+    if (usdtData) {
+      setUsdtBalance((Number(usdtData) / 1e18).toFixed(2));
+    }
+  }, [usdtData, bnbData]);
 
 
   useEffect(() => {
     if (error) {
-       ('Transaction error:', error);
+      //  ('Transaction error:', error);
     }
   }, [error]);
 
@@ -115,12 +115,11 @@ const Investment = () => {
       // toast.dismiss();
       // toast.success("Investment successful");
 
-      if(!isPending && !isConfirming) {
-         ("let's check now")
-      }
+      // if(!isPending && !isConfirming) {
+         
+      // }
 
       const investmentResponse = await invest(selectedAmount, wallet);
-       ("Investment response:", investmentResponse);
       if (investmentResponse.status && investmentResponse.status === "fail") {
         return toast.error(investmentResponse.message);
       } else {
@@ -173,12 +172,12 @@ const Investment = () => {
   
 
   if(claimError) {
-     ('Claim error:', claimError);
+    //  ('Claim error:', claimError);
     toast.error(claimError);
   }
 
   if (investmentError) {
-     ('Investment error:', investmentError);
+    //  ('Investment error:', investmentError);
     toast.error(investmentError);
   }
 
@@ -244,7 +243,16 @@ const Investment = () => {
         </div>
       </div>
       <div className="border-secondary rounded-md border">
-        
+        <div>
+          <div className="flex justify-between font-semibold text-lg">
+            <p>USDT Balance:</p>
+            <p>{usdtBalance}</p>
+          </div>
+          <div className="flex justify-between font-semibold text-lg">
+            <p>BNB Balance:</p>
+            <p>{bnbBalance}</p>
+          </div>
+        </div>
         <div className="bg-secondary px-3 text-white w-full flex gap-3">
           <img src="/icons/1.gif" alt="Investment GIF" className="w-[50px] h-full" />
           <p className="text-2xl my-auto font-semibold">Subscriptions</p>

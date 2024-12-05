@@ -13,6 +13,7 @@ export interface User {
   investments: Investment[];
   withdrawalHistory: Withdrawal[];
   claims: Claims[];
+  role: string;
   referredUsers: User[];
   name: string;
   email: string;

@@ -21,7 +21,7 @@ import { BASEURL } from "../components/context/GlobalContext";
 // }
 
 const fetchRegister = async (data: RegisterData) => {
-   ("data", data);
+  //  ("data", data);
   const request = await fetch(`${BASEURL}/user/register`, {
     method: "POST",
     headers: {
