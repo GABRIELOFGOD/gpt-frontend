@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useGlobalContext } from "../components/context/GlobalContext";
-import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+// import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "../components/dashboard/Sidebar";
 import Header from "../components/dashboard/Header";
 
 const Admin = () => {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [approvalLoading, setApprovalLoading] = useState(false);
+  // const [currentPage, setCurrentPage] = useState(0);
+  // const [approvalLoading, setApprovalLoading] = useState(false);
   // const [confirmWithdrawal, setConfirmWithdrawal] = useState(false);
   const navigate = useNavigate();
 
@@ -15,9 +15,9 @@ const Admin = () => {
   //   setConfirmWithdrawal(!confirmWithdrawal);
   // };
   
-  const itemsPerPage = 10;
+  // const itemsPerPage = 10;
 
-  const { allUsersState, allUsers, withdrawalsForAdmin, withdrawalsState, approveWithdrawal, userProfileState } = useGlobalContext();
+  const { allUsers, withdrawalsForAdmin, userProfileState } = useGlobalContext();
   
   useEffect(() => {
     if(userProfileState && userProfileState.role == "admin"){
@@ -28,33 +28,33 @@ const Admin = () => {
     }
   }, []);
   
-  const handleNextPage = () => {
-    if ((currentPage + 1) * itemsPerPage < allUsersState.length) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
+  // const handleNextPage = () => {
+  //   if ((currentPage + 1) * itemsPerPage < allUsersState.length) {
+  //     setCurrentPage(currentPage + 1);
+  //   }
+  // };
 
-  const handlePreviousPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
+  // const handlePreviousPage = () => {
+  //   if (currentPage > 0) {
+  //     setCurrentPage(currentPage - 1);
+  //   }
+  // };
 
-  const dateFormatter = (date: string) => {
-    const newDate = new Date(date);
-    return newDate.toDateString();
-  }
+  // const dateFormatter = (date: string) => {
+  //   const newDate = new Date(date);
+  //   return newDate.toDateString();
+  // }
 
-  const formatWallet = (wallet: string) => {
-    if (wallet.length <= 8) return wallet;
-    return `${wallet.slice(0, 4)}******${wallet.slice(-4)}`;
-  };
+  // const formatWallet = (wallet: string) => {
+  //   if (wallet.length <= 8) return wallet;
+  //   return `${wallet.slice(0, 4)}******${wallet.slice(-4)}`;
+  // };
 
-  const processWithdrawal = (id: number) => {
-    setApprovalLoading(true);
-    approveWithdrawal(id);
-    setApprovalLoading(false);
-  }
+  // const processWithdrawal = (id: number) => {
+  //   setApprovalLoading(true);
+  //   approveWithdrawal(id);
+  //   setApprovalLoading(false);
+  // }
 
   return (
     <div className="flex bg-neutral-100 w-full h-screen">

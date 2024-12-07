@@ -5,10 +5,10 @@ import toast from "react-hot-toast";
 
 const Header = () => {
   const [profileHover, setProfileHover] = useState(false);
-  const { allUsers, userProfile, userProfileState } = useGlobalContext();
+  const { allUsers, userProfileState } = useGlobalContext();
   
   useEffect(() => {
-    userProfile();
+    // userProfile();
     allUsers();
   }, []);
 

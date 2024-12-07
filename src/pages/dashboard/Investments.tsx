@@ -1,7 +1,9 @@
 
 const Investments = () => {
   return (
-    <div>Investments</div>
+    <div>
+      Investments
+    </div>
   )
 }
 

@@ -8,7 +8,7 @@ import { useGlobalContext } from "./context/GlobalContext";
 const Layout = () => {
   // const [loading, setLoading] = useState(false);
 
-  const { userProfile, authenticated, generalLoading: loading, setGeneralLoading: setLoading } = useGlobalContext();
+  const { userProfile, authenticated, generalLoading: loading, setGeneralLoading: setLoading, updateTokenPrice } = useGlobalContext();
   
   useEffect(() => {
     setLoading(true);
@@ -16,6 +16,7 @@ const Layout = () => {
     if (!authenticated) {
       if(userToken){
         userProfile();
+        updateTokenPrice();
       }
     }
     setLoading(false);

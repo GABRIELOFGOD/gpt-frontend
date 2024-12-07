@@ -243,16 +243,6 @@ const Investment = () => {
         </div>
       </div>
       <div className="border-secondary rounded-md border">
-        <div>
-          <div className="flex justify-between font-semibold text-lg">
-            <p>USDT Balance:</p>
-            <p>{usdtBalance}</p>
-          </div>
-          <div className="flex justify-between font-semibold text-lg">
-            <p>BNB Balance:</p>
-            <p>{bnbBalance}</p>
-          </div>
-        </div>
         <div className="bg-secondary px-3 text-white w-full flex gap-3">
           <img src="/icons/1.gif" alt="Investment GIF" className="w-[50px] h-full" />
           <p className="text-2xl my-auto font-semibold">Subscriptions</p>
@@ -325,6 +315,16 @@ const Investment = () => {
                 />
               </div>
               
+            </div>
+            <div className="pt-5">
+              <div className="flex justify-between font-semibold text-lg">
+                <p>USDT Balance:</p>
+                <p>{usdtBalance}</p>
+              </div>
+              <div className="flex justify-between font-semibold text-lg">
+                <p>BNB Balance:</p>
+                <p>{bnbBalance}</p>
+              </div>
             </div>
             
           </div>

@@ -42,9 +42,10 @@ const confirmWallet = async (wallet: string) => {
     body: JSON.stringify({ wallet }),
   });
   const response = await request.json();
-  if(!request.ok) {
-    throw new Error('Failed to confirm wallet');
-  }
+  // if(!request.ok) {
+  //   console.log("response", response);
+  //   throw new Error('Failed to confirm wallet');
+  // }
   return response;
 }
 
