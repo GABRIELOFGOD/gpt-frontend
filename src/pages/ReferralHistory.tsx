@@ -1,14 +1,15 @@
 // import { useNavigate } from "react-router-dom";
-import { useGlobalContext } from "../components/context/GlobalContext";
+// import { useGlobalContext } from "../components/context/GlobalContext";
 import { useEffect, useState } from "react";
 import useDownline from "../hooks/DownlineHook";
 import toast from "react-hot-toast";
 import { Downlines } from "../utils/data";
+import { truncateWallet } from "./Investment";
 
 const ReferralHistory = () => {
   const [level, setLevel] = useState<number>(1);
   const [downlines, setDownline] = useState<Downlines[]>([]);
-  const { userProfileState } = useGlobalContext();
+  // const { userProfileState } = useGlobalContext();
   const { userDownline, downline, isLoading, error } = useDownline();
   
   // const navigate = useNavigate();
@@ -23,12 +24,13 @@ const ReferralHistory = () => {
   }
 
   const setDownlineWithLevel = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    // console.log(downline);
     setLevel(parseInt(e.target.value));
     setDownline(downline?.filter((downline) => downline.level === parseInt(e.target.value)));
   }
   
   useEffect(() => {
-    setDownline(downline);
+    setDownline(downline.filter((downline) => downline.level === level));
   }, [downline]);
 
   const obfuscateEmail = (email: string): string => {
@@ -65,6 +67,9 @@ const ReferralHistory = () => {
             <thead className="bg-secondary">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                  Email
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Wallet
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
@@ -73,10 +78,13 @@ const ReferralHistory = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-secondary">
-              {userProfileState?.referredUsers.map((referral, index) => (
+              {downlines.map((referral, index) => (
               <tr key={index}>
                 <td className="px-6 py-4 whitespace-nowrap text-[8px] md:text-sm">
                     {obfuscateEmail(referral.email)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-[8px] md:text-sm">
+                    {truncateWallet(referral.wallet)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   {referral.investments ? referral.investments.reduce((acc, investment) => acc + investment.amount, 0) : 0}

@@ -86,11 +86,6 @@ export interface DoughtnutChartProps {
   remainingLabel: string;
 }
 
-export interface Downlines {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
+export interface Downlines extends User {
   level: number;
-  investment: number;
 }

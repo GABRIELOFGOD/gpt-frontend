@@ -28,7 +28,8 @@ const Layout = () => {
   
   return (
     <div>
-      { loading ? <Loading /> : !authenticated ? <LoginModal /> :
+      { loading ? <Loading /> : !authenticated ? location.pathname === '/reset-password' ? <Outlet /> :
+        <LoginModal /> :
         <div>
           {!excempted.includes(location.pathname) && <Navbar />}
           <Outlet />

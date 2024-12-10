@@ -19,15 +19,21 @@ const availableSub: number[] = [
   100, 300, 500, 1000, 3000, 5000, 10000, 25000, 50000, 100000
 ]
 
+export const truncateWallet = (wallet: string): string => {
+  if (!wallet) return "";
+  return `${wallet.slice(0, 4)}****${wallet.slice(-4)}`;
+};
+
 const Investment = () => {
   const { userWallet, userProfileState } = useGlobalContext();
   const navigate = useNavigate();
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
-  const { data: hash, writeContract, isPending, error } = useWriteContract()
+  const { data: hash, writeContractAsync, isPending, error, status } = useWriteContract()
   const [usdtBalance, setUsdtBalance] = useState<string>("0");
   const [bnbBalance, setbnbBalance] = useState<string>("0");
   const [confirmWithdraw, setConfirmWithdraw] = useState<boolean>(false);
 
+  const [isApproved, setIsApproved] = useState<"first" | "second" | "none">("none");
 
   const { invest, error: investmentError, isLoading: isInvesting } = useInvestment();
   const { claimRef, claimRoi, isLoading: claimLoading, error: claimError } = useClaim()
@@ -81,53 +87,150 @@ const Investment = () => {
 
   const { checkWallet } = useRegister();
 
-  const handleDeposit = async () => {
-    if (!selectedAmount) return;
+  async function handleDeposit() {
+  //   if (!selectedAmount) return;
 
-    // toast.loading("Investment in progress...");
-    // TODO: Check if user has approved contract
-    // TODO: ensure it registered wallet that wants to deposit
+  //   const wallet = address as string;
 
-    const wallet = address as string;
+  //   const walletResponse = await checkWallet(wallet);
+  //   if (!walletResponse.user || walletResponse.user.wallet !== wallet) {
+  //     toast.dismiss();
+  //     toast.error("The connected wallet is not registered, kindly register");
+  //     return;
+  //   }
 
-    const walletResponse = await checkWallet(wallet);
-    if (!walletResponse.user || walletResponse.user.wallet !== wallet) {
-      toast.dismiss();
-      toast.error("The connected wallet is not registered, kindly register");
-      return;
-    }
+  //   // =========== CHECKING APPROVAL ============== //
+  //   const approvalStatus = await useReadContract({
+  //     ...tokenAbi,
+  //     address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517',
+  //     functionName: 'allowance',
+  //     args: [wallet, '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23'],
+  //   });
 
-    // =========== APRROVING CONTRACT ============== //
-      await writeContract({
+  //   if (approvalStatus?.data && BigInt(approvalStatus.data as string) >= BigInt(selectedAmount * 1e18)) {
+  //     setIsApproved(true);
+  //   } else {
+  //     try {
+  //       await writeContract({
+  //         ...tokenAbi,
+  //         address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517',
+  //         functionName: 'approve',
+  //         args: ['0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23', BigInt(selectedAmount * 1e18)],
+  //       });
+  //       setIsApproved(true);
+  //     } catch {
+  //       toast.error("Approval failed");
+  //       return;
+  //     }
+
+  //     if (isApproved) {
+  //       setIsApproved(true);
+  //     } else {
+  //       toast.error("Approval failed");
+  //       return;
+  //     }
+  //   }
+
+  //   // =========== DEPOSITING CONTRACT ============== //
+  //   if (isApproved) {
+  //     await writeContract({
+  //       ...contractAbi,
+  //       address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23',
+  //       functionName: 'deposit',
+  //       args: [BigInt(selectedAmount * 1e18)],
+  //     });
+
+  //     // Assuming the contract call was successful if no error was thrown
+  //     {
+  //       // Call backend API to trigger deposit
+  //       const response = await fetch('/api/deposit', {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify({ wallet, amount: selectedAmount }),
+  //       });
+
+  //       const data = await response.json();
+  //       if (data.success) {
+  //         toast.success("Deposit successful");
+  //         location.reload();
+  //       } else {
+  //         toast.error("Backend deposit trigger failed");
+  //       }
+  //     toast.error("Deposit failed");
+  //   }
+  // }
+
+  if (!selectedAmount) return;
+
+  // =============== CHECK WALLET ================== //
+  const wallet = address as string;
+  const walletResponse = await checkWallet(wallet);
+  if (!walletResponse.user || walletResponse.user.wallet !== userProfileState?.wallet) {
+    toast.dismiss();
+    toast.error("Sorry!, you can only invest with the registered wallet");
+    return;
+  }
+
+  if (isApproved == "none") {
+    try {
+      const approved = await writeContractAsync({
         ...tokenAbi,
         address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517',
         functionName: 'approve',
         args: ['0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23', BigInt(selectedAmount * 1e18)],
       });
-
-      // =========== DEPOSITING CONTRACT ============== //
-      await writeContract({
-        ...contractAbi,
-        address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23',
-        functionName: 'deposit',
-        args: [BigInt(selectedAmount * 1e18)],
-      });
-      // toast.dismiss();
-      // toast.success("Investment successful");
-
-      // if(!isPending && !isConfirming) {
-         
-      // }
-
-      const investmentResponse = await invest(selectedAmount, wallet);
-      if (investmentResponse.status && investmentResponse.status === "fail") {
-        return toast.error(investmentResponse.message);
-      } else {
-        toast.success(investmentResponse.message);
-        location.reload();
-      }
-    
+      console.log(approved);
+      setIsApproved("first");
+    } catch (error) {
+      toast.error("Failed to approve deposit");
+      
+    }
   }
+}
+
+const signDeposit = async () => {
+  try {
+    const deposit = await writeContractAsync({
+      ...contractAbi,
+      address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23',
+      functionName: 'deposit',
+      args: [BigInt(selectedAmount * 1e18)],
+    });
+    console.log(deposit);
+    setIsApproved("second");
+  } catch (error) {
+    toast.error("Failed to deposit");
+  }
+}
+
+// useEffect(() => {
+//   if (isApproved === "first") {
+//     signDeposit();
+//   }
+// }, [status, isApproved]);
+
+useEffect(() => {
+  console.log("status", status);
+}, []);
+
+const runBackendDeposit = async () => {
+  const wallet = address as string;
+  const investmentResponse = await invest(selectedAmount, wallet);
+  if (investmentResponse.status && investmentResponse.status === "fail") {
+    return toast.error(investmentResponse.message);
+  } else {
+    toast.success(investmentResponse.message);
+    location.reload();
+  }
+}
+
+useEffect(() => {
+  if (isApproved === "second") {
+    runBackendDeposit();
+  }
+},[status, isApproved]);
 
   const { userEarnings } = useEarning();
   // const [allEarnings, setAllEarnings] = useState<EarningHistory[]>([]);
@@ -212,7 +315,7 @@ const Investment = () => {
   }  
 
   const copyToClipBoard = () => {
-    navigator.clipboard.writeText(`https://app.gptbots.pro/investment?ref=${userProfileState?.referralCode}`);
+    navigator.clipboard.writeText(`https://app.gptbots.pro/investments?ref=${userProfileState?.referralCode}`);
     toast.success("Referral link copied to clipboard");
   }
 
@@ -240,6 +343,8 @@ const Investment = () => {
           <p className="text-xs font-semibold">Name: <span>{userProfileState?.name}</span></p>
           <p className="text-xs font-semibold">Phone: <span>{userProfileState?.phone}</span></p>
           <p className="text-xs font-semibold">Email: <span>{userProfileState?.email}</span></p>
+          <p className="text-xs font-semibold hidden md:flex">Wallet: <span>{userProfileState?.wallet}</span></p>
+          <p className="text-xs font-semibold flex md:hidden">Wallet: <span>{truncateWallet(userProfileState?.wallet || "")}</span></p>
         </div>
       </div>
       <div className="border-secondary rounded-md border">
@@ -331,9 +436,9 @@ const Investment = () => {
           { !isConnected ? <button className="w-full text-neutral-300 bg-lime-50 py-2 rounded-md">Connect wallet to invests</button>
           : <button
             className={`flex justify-center w-full rounded-md py-2 bg-secondary text-white text-lg font-semibold ${(!selectedAmount || isPending || isConfirming || isInvesting) ? 'opacity-50 cursor-not-allowed' : ''}`}
-            onClick={handleDeposit}
+            onClick={isApproved === "first" ? signDeposit : handleDeposit}
           >
-            {isPending || isConfirming || isInvesting ? "Investing..." : "Invest USDT"}
+            {isPending || isConfirming || isInvesting ? "Processing..." : isApproved === "first" ? `invest ${selectedAmount} USDT` : `Approve ${selectedAmount} USDT`}
           </button>}
             {/* }: !isApproved ? <button
             onClick={handleApprove}

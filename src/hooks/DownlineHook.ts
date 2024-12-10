@@ -11,6 +11,7 @@ const getDownline = async () => {
     },
   });
   const response = await request.json();
+  console.log("Response from hook", response);
   if (!request.ok) {
     throw new Error("Failed to fetch downline");
   }

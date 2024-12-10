@@ -21,7 +21,6 @@ const Login = ({setScreen}:{setScreen: Dispatch<SetStateAction<string>>}) => {
   }
 
   if(loginError) {
-     (loginError);
     toast.error(loginError);
   }
   
@@ -48,7 +47,7 @@ const Login = ({setScreen}:{setScreen: Dispatch<SetStateAction<string>>}) => {
           onChange={e => setPassword(e.target.value)}
         />
         <div className="flex justify-between text-secondary underline">
-          <div className="flex items-center">
+          <div className="flex items-center cursor-pointer " onClick={()=>setScreen("forgot-password")}>
             Forgot password?
           </div>
           <p className="text-primary cursor-pointer" onClick={() => setScreen('register')}>Register</p>

@@ -110,11 +110,22 @@ const Register = ({setScreen}:{setScreen: Dispatch<SetStateAction<string>>}) => 
           </div>
           <p className="text-primary cursor-pointer" onClick={() => setScreen('login')}>Login</p>
         </div>
+        {isConnected ? <small className="text-[8px] text-green-500" >
+          wallet connected
+        </small> : <small className="text-[8px] text-red-500 flex gap-2" >
+          <span>Wallet not connected, make sure you have web3 wallet activated</span>
+          <span
+            className="underline cursor-pointer"
+            onClick={connectWallet}
+          >
+            Connect wallet
+          </span>
+        </small>}
         <button
           className='w-full h-12 bg-secondary text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed'
           disabled={registerLoading || !name || !phone || !email || !password || !confirmPassword}
         >
-          {registerLoading ? 'Loading...' : 'Register'}
+          {registerLoading ? 'Loading...' :  'Register'}
         </button>
       </form>
     </div>

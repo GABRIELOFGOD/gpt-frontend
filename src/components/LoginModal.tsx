@@ -1,9 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Login from "./navbar/Login";
 import Register from "./navbar/Register";
+import ForgotPassword from "../pages/ForgotPassword";
+import { useLocation } from "react-router-dom";
 
 const LoginModal = () => {
   const [screen, setScreen] = useState('login');
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const ref = queryParams.get('ref');
+
+  useEffect(() => {
+    if(ref) {
+      setScreen('register');
+    }
+  }, []);
   
   return (
     <div className="flex fixed top-0 left-0 z-50 justify-center items-center w-full h-screen p-3 md:p-10 flex-col">
@@ -14,6 +25,7 @@ const LoginModal = () => {
       <div className="w-full flex justify-center items-center">
         {screen === 'login' && <Login setScreen={setScreen} />}
         {screen === 'register' && <Register setScreen={setScreen} />}
+        {screen === 'forgot-password' && <ForgotPassword setScreen={setScreen} />}
       </div>
     </div>
   )

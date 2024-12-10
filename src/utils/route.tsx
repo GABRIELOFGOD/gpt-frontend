@@ -13,6 +13,7 @@ import Withdrawal from '../pages/dashboard/Withdrawal';
 import WithdrawalReport from '../pages/dashboard/WithdrawalReport';
 import Investments from '../pages/dashboard/Investments';
 import Support from '../pages/dashboard/Support';
+import ResetPassword from '../pages/ResetPassword';
 
 const route = createBrowserRouter([
   {
@@ -72,6 +73,10 @@ const route = createBrowserRouter([
       {
         path: "games",
         element: <Game />
+      },
+      {
+        path: "reset-password",
+        element: <ResetPassword />
       }
     ]
   }
