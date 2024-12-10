@@ -182,6 +182,7 @@ const Investment = () => {
         args: ['0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23', BigInt(selectedAmount * 1e18)],
       });
       console.log(approved);
+      toast.success("Approved successfully, click on the button again to trigger deposit");
       setIsApproved("first");
     } catch (error) {
       toast.error("Failed to approve deposit");
