@@ -12,8 +12,10 @@ import useInvestment from "../hooks/InvestmentHook";
 import useClaim from "../hooks/ClaimHook";
 import DoughnutChart from "../components/charts/Doughtnut";
 import useEarning from "../hooks/userHook";
-import { EarningHistory } from "../utils/data";
+import { EarningHistory, User } from "../utils/data";
 import useRegister from "../hooks/RegisterHook";
+import useDownline from "../hooks/DownlineHook";
+import { formatEther } from "viem";
 
 const availableSub: number[] = [
   100, 300, 500, 1000, 3000, 5000, 10000, 25000, 50000, 100000
@@ -23,6 +25,14 @@ export const truncateWallet = (wallet: string): string => {
   if (!wallet) return "";
   return `${wallet.slice(0, 4)}****${wallet.slice(-4)}`;
 };
+
+export function gettingAllReferralsInvestment(referrals: User[]) {
+  let total = 0;
+  referrals.forEach((referral: any) => {
+    total += referral?.investments.reduce((sum: number, investment: any) => sum + investment.amount, 0);
+  });
+  return total;
+}
 
 const Investment = () => {
   const { userWallet, userProfileState } = useGlobalContext();
@@ -41,14 +51,23 @@ const Investment = () => {
 
   const { isConnected, address } = useAccount();
 
+  const { downline, userDownline } = useDownline();
+
   // const [isApproved, setIsApproved] = useState(false);
 
   // Get USDT balance
+  // const { data: usdtData } = useReadContract({
+  //   ...tokenAbi,
+  //   address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517', // USDT contract address
+  //   functionName: 'balanceOf',
+  //   args: [userWallet as `0x${string}`],
+  // });
+
   const { data: usdtData } = useReadContract({
     ...tokenAbi,
     address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517', // USDT contract address
     functionName: 'balanceOf',
-    args: [userWallet as `0x${string}`],
+    args: [userWallet],
   });
 
   // Get BNB balance
@@ -61,16 +80,14 @@ const Investment = () => {
     useWaitForTransactionReceipt({
     hash,
   })
+  
   useEffect(() => {
-    // {userProfileState &&  (userProfileState)}
-    if (bnbData) {
-      setbnbBalance(Number(bnbData.formatted).toFixed(2));
+    // Update BNB balance
+    if (bnbData && bnbData.value) {
+      setbnbBalance(formatEther(bnbData.value)); // Convert BigNumber to readable string
     }
-
-    if (usdtData) {
-      setUsdtBalance((Number(usdtData) / 1e18).toFixed(2));
-    }
-  }, [usdtData, bnbData]);
+    setUsdtBalance("0");
+  }, [bnbData, usdtData]);
 
 
   useEffect(() => {
@@ -88,80 +105,6 @@ const Investment = () => {
   const { checkWallet } = useRegister();
 
   async function handleDeposit() {
-  //   if (!selectedAmount) return;
-
-  //   const wallet = address as string;
-
-  //   const walletResponse = await checkWallet(wallet);
-  //   if (!walletResponse.user || walletResponse.user.wallet !== wallet) {
-  //     toast.dismiss();
-  //     toast.error("The connected wallet is not registered, kindly register");
-  //     return;
-  //   }
-
-  //   // =========== CHECKING APPROVAL ============== //
-  //   const approvalStatus = await useReadContract({
-  //     ...tokenAbi,
-  //     address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517',
-  //     functionName: 'allowance',
-  //     args: [wallet, '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23'],
-  //   });
-
-  //   if (approvalStatus?.data && BigInt(approvalStatus.data as string) >= BigInt(selectedAmount * 1e18)) {
-  //     setIsApproved(true);
-  //   } else {
-  //     try {
-  //       await writeContract({
-  //         ...tokenAbi,
-  //         address: '0x25ed48E0f7B9Be6024866A4eF4a3882333181517',
-  //         functionName: 'approve',
-  //         args: ['0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23', BigInt(selectedAmount * 1e18)],
-  //       });
-  //       setIsApproved(true);
-  //     } catch {
-  //       toast.error("Approval failed");
-  //       return;
-  //     }
-
-  //     if (isApproved) {
-  //       setIsApproved(true);
-  //     } else {
-  //       toast.error("Approval failed");
-  //       return;
-  //     }
-  //   }
-
-  //   // =========== DEPOSITING CONTRACT ============== //
-  //   if (isApproved) {
-  //     await writeContract({
-  //       ...contractAbi,
-  //       address: '0x91B17e88cdDfCE018f7c3CFA0341aCcB26B57f23',
-  //       functionName: 'deposit',
-  //       args: [BigInt(selectedAmount * 1e18)],
-  //     });
-
-  //     // Assuming the contract call was successful if no error was thrown
-  //     {
-  //       // Call backend API to trigger deposit
-  //       const response = await fetch('/api/deposit', {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify({ wallet, amount: selectedAmount }),
-  //       });
-
-  //       const data = await response.json();
-  //       if (data.success) {
-  //         toast.success("Deposit successful");
-  //         location.reload();
-  //       } else {
-  //         toast.error("Backend deposit trigger failed");
-  //       }
-  //     toast.error("Deposit failed");
-  //   }
-  // }
-
   if (!selectedAmount) return;
 
   // =============== CHECK WALLET ================== //
@@ -213,7 +156,8 @@ const signDeposit = async () => {
 // }, [status, isApproved]);
 
 useEffect(() => {
-  console.log("status", status);
+  userDownline();
+  console.log(downline);
 }, []);
 
 const runBackendDeposit = async () => {
@@ -338,7 +282,7 @@ useEffect(() => {
         <img src="/images/bg.avif" className="h-full w-full" alt="background image" />
       </div>
       <div className="flex gap-3 bg-light py-5">
-        <img src="/static/8.png" className="w-[100px]" alt="GPTBOT" />
+        {!isConnected ? <img src="/icons/Wallet Not Connected.gif" className="w-[120px]" alt="GPTBOT" /> : <img src="/icons/wallet connected.gif" className="w-[120px]" alt="GPTBOT" />}
         <div className="flex flex-col gap-3">
           <p className="md:text-2xl text-lg text-secondary font-bold">Hello!, Welcome to GPTBOT</p>
           <p className="text-xs font-semibold">Name: <span>{userProfileState?.name}</span></p>
@@ -394,6 +338,10 @@ useEffect(() => {
               <p>{userProfileState?.investments.reduce((total, investment) => total + investment.amount, 0)}</p>
             </div> */}
 
+            <div className="flex font-semibold justify-between">
+              <p>Account status</p>
+              {userProfileState?.hasActiveInvestment ? <p className="text-green-500">Active</p> : <p className="text-red-500">Inactive</p>}
+            </div>
             <div className="flex justify-between font-semibold text-lg">
               <div className="my-auto flex flex-col gap-2">
                 <div>
@@ -401,8 +349,8 @@ useEffect(() => {
                   <p className="text-sm text-secondary ">{userProfileState?.investments.reduce((total, investment) => total + investment.amount, 0)}</p>
                 </div>
                 <div>
-                  <p>Total ROI</p>
-                  <p className="text-sm text-secondary ">{totalROI.toFixed(4)}</p>
+                  <p>Total Earning</p>
+                  <p className="text-sm text-secondary ">{(totalROI+totalReferral).toFixed(4)}</p>
                 
                 </div>
                 <div>
@@ -414,7 +362,7 @@ useEffect(() => {
               <div className="h-[100px]">
                 <DoughnutChart
                   color="blue"
-                  percentage={totalEarningToPercentage(userProfileState?.investments.reduce((total, investment) => total + investment.amount, 0)! * 3, totalROI)}
+                  percentage={totalEarningToPercentage(userProfileState?.investments.reduce((total, investment) => total + investment.amount, 0)! * 3, totalROI+totalReferral)}
                   // total={totalEarningToPercentage(totalROI)}
                   completeLabel="Total ROI"
                   remainingLabel="Ceiling limit"
@@ -537,15 +485,19 @@ useEffect(() => {
           </div> */}
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Total Team</p>
-            <p>0</p>
+            <p>
+              { downline && downline.length }
+            </p>
           </div>
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Direct Volume</p>
-            <p>0</p>
+            <p>{userProfileState?.referredUsers && gettingAllReferralsInvestment(userProfileState?.referredUsers)}</p>
           </div>
           <div className="bg-light text-secondary text-lg font-semibold rounded-md px-3 flex justify-between py-2">
             <p>Team Volume</p>
-            <p>0</p>
+            <p>
+              {downline && downline.reduce((total, down) => total + down.investments.reduce((sum, investment) => sum + investment.amount, 0), 0)}
+            </p>
           </div>
         </div>
       </div>

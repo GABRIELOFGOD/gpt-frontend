@@ -46,28 +46,32 @@ const Withrawals = () => {
     <div className="px-3 md:px-52 flex flex-col gap-10 py-10 md:py-20">
     <div className="flex gap-1">
       <button
-        className={`flex justify-center w-1/2 rounded-md py-2 items-center text-white text-xs md:text-lg font-semibold ${tab == "withdrawal" ? "bg-secondary" : "bg-primary"}`}
+        className={`flex justify-center w-1/2 rounded-md py-2 flex-col gap-1 items-center text-white text-xs md:text-lg font-semibold ${tab == "withdrawal" ? "bg-secondary" : "bg-primary"}`}
         onClick={() => setTab("withdrawal")}
       >
-        Withdrawal History
+        <img src="/report/withdraw.gif" alt="withdrawal" className="w-[70px] my-auto h-fit" />
+        <span>Withdrawal History</span>
       </button>
       <button
-        className={`flex justify-center w-1/2 rounded-md py-2 items-center text-white text-xs md:text-lg font-semibold ${tab == "earningRoi" ? "bg-secondary" : "bg-primary"}`}
+        className={`flex justify-center w-1/2 rounded-md py-2 flex-col gap-1 items-center text-white text-xs md:text-lg font-semibold ${tab == "earningRoi" ? "bg-secondary" : "bg-primary"}`}
         onClick={() => setTab("earningRoi")}
       >
-        Earning History (ROI)
+        <img src="/report/ROI.gif" alt="earning" className="w-[70px] my-auto h-fit" />
+        <span>Earning History (ROI)</span>
       </button>
       <button
-        className={`flex justify-center w-1/2 rounded-md py-2 items-center text-white text-xs md:text-lg font-semibold ${tab == "earningAff" ? "bg-secondary" : "bg-primary"}`}
+        className={`flex justify-center w-1/2 rounded-md py-2 flex-col gap-1 items-center text-white text-xs md:text-lg font-semibold ${tab == "earningAff" ? "bg-secondary" : "bg-primary"}`}
         onClick={() => setTab("earningAff")}
       >
-        Earning History (Affliate)
+        <img src="/report/affiliate.gif" alt="earning" className="w-[50px] my-auto h-fit" />
+        <span>Earning History (Affliate)</span>
       </button>
       <button
-        className={`flex justify-center w-1/2 rounded-md py-2 items-center text-white text-xs md:text-lg font-semibold ${tab == "investment" ? "bg-secondary" : "bg-primary"}`}
+        className={`flex justify-center w-1/2 rounded-md py-2 flex-col gap-1 items-center text-white text-xs md:text-lg font-semibold ${tab == "investment" ? "bg-secondary" : "bg-primary"}`}
         onClick={() => setTab("investment")}
       >
-        Investment History
+        <img src="/report/investment.gif" alt="earning" className="w-[70px] my-auto h-fit" />
+        <span>Investment History</span>
       </button>
     </div>
     

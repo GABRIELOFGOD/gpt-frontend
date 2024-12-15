@@ -162,7 +162,7 @@ export const CreateGlobalContext = ({ children }: Props) => {
       },
     });
     const response = await request.json();
-     (response);
+     console.log("user response", response);
     if(!request.ok) {
       disconnect();
       setAuthenticated(false);

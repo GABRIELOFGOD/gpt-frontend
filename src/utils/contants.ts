@@ -5,6 +5,7 @@ import { IconType } from "react-icons";
 export interface NavLiistType {
   path: string;
   name: string;
+  image?: string;
   icon?: IconType;
 }
 
@@ -20,23 +21,28 @@ export interface IDashboard  {
 export const navList: NavLiistType[] = [
   {
     path: "/investments",
-    name: "Investments"
+    name: "Dashboard",
+    image: "/MENU/Investment.png"
   },
   {
     path: "/referral-history",
-    name: "Referrals"
+    name: "Referrals",
+    image: "/MENU/Team.png"
   },
   {
     path: "/records",
-    name: "Records"
+    name: "Records",
+    image: "/MENU/Report.png"
   },
   {
     path: "/games",
-    name: "Game"
+    name: "Game",
+    image: "/MENU/GAME.png"
   },
   {
     path: "/swap",
-    name: "Swap"
+    name: "Swap",
+    image: "/MENU/SWAP.png"
   }
 ]
 

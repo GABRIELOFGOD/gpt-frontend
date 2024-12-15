@@ -9,7 +9,8 @@ export interface User {
   claimableROI: string;
   claimableRef: string;
   status: string;
-  referredBy: User | null;
+  referredBy: User | null;x
+  hasActiveInvestment: bool;
   investments: Investment[];
   withdrawalHistory: Withdrawal[];
   claims: Claims[];

@@ -87,7 +87,7 @@ const ReferralHistory = () => {
                     {truncateWallet(referral.wallet)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {referral.investments ? referral.investments.reduce((acc, investment) => acc + investment.amount, 0) : 0}
+                  {referral.investments && referral.investments.reduce((acc, investment) => acc + investment.amount, 0)}
                 </td>
               </tr>
               ))}

@@ -104,7 +104,10 @@ const Swap = () => {
 
       {/* Swap Container */}
       <div className="px-5 py-10 rounded-lg bg-white w-full h-fit">
-        <h1 className="font-bold text-2xl md:text-4xl">Swap</h1>
+        <div className="flex gap-2">
+          <img src="/icons/GPT SWAP.gif" alt="Loader" className="w-[50px]" />
+          <h1 className="font-bold text-2xl md:text-4xl my-auto">GPT Swap</h1>
+        </div>
         <p className="font-semibold md:text-2xl text-neutral-500">
           Convert your USDT to GPTCOIN
         </p>
